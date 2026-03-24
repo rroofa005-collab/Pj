@@ -188,21 +188,22 @@ export default function LoginClient({ lang }: Props) {
         }
         .toast {
           position: fixed;
-          bottom: 36px;
+          top: 50%;
           left: 50%;
-          transform: translateX(-50%);
+          transform: translate(-50%, -50%);
           z-index: 999;
           background: linear-gradient(135deg, #0d1f35, #1e4876);
           color: #c5d4e3;
-          padding: 12px 28px;
-          border-radius: 30px;
-          font-size: 0.95rem;
-          font-weight: 700;
+          padding: 28px 48px;
+          border-radius: 20px;
+          font-size: 1.3rem;
+          font-weight: 800;
           border: 1px solid rgba(138,168,200,0.3);
-          box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+          box-shadow: 0 20px 60px rgba(0,0,0,0.6);
           animation: toastIn 0.3s ease forwards;
           white-space: nowrap;
-          letter-spacing: 0.5px;
+          letter-spacing: 1px;
+          text-align: center;
         }
       `}</style>
 
