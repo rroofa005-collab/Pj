@@ -42,7 +42,7 @@ interface AppLayoutProps {
 }
 
 export default function AppLayout({ children, lang, role, permissions, username }: AppLayoutProps) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const language = (lang || "ar") as Language;
@@ -52,7 +52,6 @@ export default function AppLayout({ children, lang, role, permissions, username 
   const visibleNav = ALL_NAV.filter((item) => {
     if (item.key === "dashboard") return true;
     if (isAdmin) return true;
-    // Non-admin can only see pages that have permissions
     const pageKey = item.href.replace("/dashboard/", "") || "dashboard";
     return permissions.includes(pageKey) || permissions.includes(item.key);
   });
@@ -62,16 +61,52 @@ export default function AppLayout({ children, lang, role, permissions, username 
     router.push("/");
   }
 
+  function handleNavClick() {
+    setSidebarOpen(false);
+  }
+
   useEffect(() => {
     document.documentElement.setAttribute("dir", dir);
     document.documentElement.setAttribute("lang", language);
   }, [dir, language]);
 
+  // Close sidebar on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   return (
     <div dir={dir} style={{ display: "flex", minHeight: "100vh" }}>
+      {/* Mobile overlay */}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.5)",
+            zIndex: 40,
+            display: "block",
+          }}
+          className="mobile-overlay"
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="sidebar" style={{ display: "flex", flexDirection: "column" }}>
-        {/* Logo */}
+      <aside 
+        className="sidebar"
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          transform: sidebarOpen ? "translateX(0)" : undefined,
+          position: "fixed",
+          top: 0,
+          zIndex: 50,
+          height: "100vh",
+          transition: "transform 0.3s ease",
+        }}
+      >
+        {/* Header */}
         <div style={{ padding: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", gap: "10px" }}>
           <Image
             src="https://assets.kiloapps.io/user_dd4037cd-bc12-4818-a841-664202163b63/7ba274dd-eee4-4356-81ed-3609f94a4da8/1b601af4-0e53-4e3a-a63c-8b45dae62cb2.png"
@@ -80,11 +115,23 @@ export default function AppLayout({ children, lang, role, permissions, username 
             height={36}
             style={{ borderRadius: "8px" }}
           />
-          {!collapsed && (
-            <span style={{ color: "white", fontWeight: 700, fontSize: "0.95rem" }}>
-              R-Manager Pro
-            </span>
-          )}
+          <span style={{ color: "white", fontWeight: 700, fontSize: "0.95rem" }}>
+            R-Manager Pro
+          </span>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              marginInlineStart: "auto",
+              background: "none",
+              border: "none",
+              color: "white",
+              fontSize: "1.5rem",
+              cursor: "pointer",
+              padding: "0 4px",
+            }}
+          >
+            ×
+          </button>
         </div>
 
         {/* User info */}
@@ -101,6 +148,7 @@ export default function AppLayout({ children, lang, role, permissions, username 
               <Link
                 key={item.key}
                 href={item.href}
+                onClick={handleNavClick}
                 className={`sidebar-link ${isActive ? "active" : ""}`}
               >
                 <span style={{ fontSize: "1rem" }}>{item.icon}</span>
@@ -127,9 +175,102 @@ export default function AppLayout({ children, lang, role, permissions, username 
       </aside>
 
       {/* Main */}
-      <main className="main-content" style={{ flex: 1, padding: "24px", background: "var(--bg)" }}>
+      <main 
+        className="main-content" 
+        style={{ 
+          flex: 1, 
+          padding: "16px", 
+          background: "var(--bg)",
+          marginInlineStart: 0,
+        }}
+      >
+        {/* Mobile menu button */}
+        <button
+          onClick={() => setSidebarOpen(true)}
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            [dir === "rtl" ? "left" : "right"]: "20px",
+            width: "56px",
+            height: "56px",
+            borderRadius: "50%",
+            background: "var(--primary)",
+            color: "white",
+            border: "none",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+            fontSize: "1.5rem",
+            cursor: "pointer",
+            zIndex: 30,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          ☰
+        </button>
         {children}
       </main>
+
+      <style jsx global>{`
+        @media (max-width: 768px) {
+          .sidebar {
+            width: 280px !important;
+          }
+          [dir="rtl"] .sidebar {
+            transform: translateX(100%);
+          }
+          [dir="ltr"] .sidebar {
+            transform: translateX(-100%);
+          }
+          .sidebar:not([style*="transform"]) {
+            transform: translateX(-100%) !important;
+          }
+          .main-content {
+            margin-inlineStart: 0 !important;
+            padding: 12px !important;
+          }
+          .data-table {
+            font-size: 0.75rem !important;
+          }
+          .data-table th, .data-table td {
+            padding: 6px 8px !important;
+          }
+          .card {
+            padding: 12px !important;
+          }
+          .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px !important;
+          }
+          .page-title {
+            font-size: 1.1rem !important;
+          }
+          .btn {
+            padding: 6px 10px !important;
+            font-size: 0.8rem !important;
+          }
+          .modal-box {
+            padding: 16px !important;
+            margin: 8px !important;
+          }
+          .form-control {
+            padding: 6px 8px !important;
+            font-size: 0.85rem !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .sidebar {
+            width: 260px !important;
+          }
+          .stat-card {
+            padding: 10px 12px !important;
+          }
+          .stat-card .stat-value {
+            font-size: 1.1rem !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
