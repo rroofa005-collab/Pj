@@ -18,6 +18,7 @@ export default function OrdersClient({ lang, role }: { lang: string; role?: stri
     { key: "product", label: t(language, "product") },
     { key: "totalAmountNoDelivery", label: t(language, "totalAmount"), type: "number" as const },
     { key: "wilaya", label: t(language, "wilaya") },
+    { key: "place", label: t(language, "place") },
     {
       key: "orderStatus", label: t(language, "orderStatus"), type: "badge" as const,
       badgeMap: { pending: "badge-warning", shipped: "badge-info", delivered: "badge-success", cancelled: "badge-danger" }
@@ -29,6 +30,7 @@ export default function OrdersClient({ lang, role }: { lang: string; role?: stri
     { key: "product", label: t(language, "product"), type: "text" as const },
     { key: "totalAmountNoDelivery", label: t(language, "totalAmount"), type: "number" as const },
     { key: "wilaya", label: t(language, "wilaya"), type: "select" as const, options: WILAYAS.map((w) => ({ value: w, label: w })) },
+    { key: "place", label: t(language, "place"), type: "text" as const },
     {
       key: "orderStatus", label: t(language, "orderStatus"), type: "select" as const,
       options: [
@@ -47,7 +49,7 @@ export default function OrdersClient({ lang, role }: { lang: string; role?: stri
       fields={fields}
       lang={lang}
       role={role}
-      defaultValues={{ name: "", product: "", totalAmountNoDelivery: 0, wilaya: "", orderStatus: "pending" }}
+      defaultValues={{ name: "", product: "", totalAmountNoDelivery: 0, wilaya: "", place: "", orderStatus: "pending" }}
     />
   );
 }

@@ -124,6 +124,7 @@ export const orders = sqliteTable("orders", {
   product: text("product"),
   totalAmountNoDelivery: real("total_amount_no_delivery").notNull().default(0),
   wilaya: text("wilaya"),
+  place: text("place"),
   orderStatus: text("order_status").notNull().default("pending"),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });

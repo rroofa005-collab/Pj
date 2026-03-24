@@ -8,6 +8,13 @@
       "when": 1774316271569,
       "tag": "0000_amazing_inhumans",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1774319818444,
+      "tag": "0001_wonderful_warpath",
+      "breakpoints": true
     }
   ]
 }

@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
   const result = await db.insert(orders).values({
     name: body.name, product: body.product,
     totalAmountNoDelivery: Number(body.totalAmountNoDelivery) || 0,
-    wilaya: body.wilaya, orderStatus: body.orderStatus || "pending",
+    wilaya: body.wilaya, place: body.place, orderStatus: body.orderStatus || "pending",
   }).returning();
   return NextResponse.json(result[0]);
 }
@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest) {
   const result = await db.update(orders).set({
     name: body.name, product: body.product,
     totalAmountNoDelivery: Number(body.totalAmountNoDelivery) || 0,
-    wilaya: body.wilaya, orderStatus: body.orderStatus || "pending",
+    wilaya: body.wilaya, place: body.place, orderStatus: body.orderStatus || "pending",
   }).where(eq(orders.id, body.id)).returning();
   return NextResponse.json(result[0]);
 }
