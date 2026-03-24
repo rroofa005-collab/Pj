@@ -23,6 +23,13 @@ const defaultDevInfo: DeveloperInfo = {
   info: "",
 };
 
+interface FeedbackItem {
+  text: string;
+  date: string;
+  userRole: string;
+  username?: string;
+}
+
 export default function SettingsClient({ lang, role }: { lang: string; role: string }) {
   const [language, setLanguage] = useState(lang || "ar");
   const [saving, setSaving] = useState(false);
@@ -33,12 +40,13 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
   const [feedbackText, setFeedbackText] = useState("");
   const [sendingFeedback, setSendingFeedback] = useState(false);
   const [feedbackSent, setFeedbackSent] = useState(false);
+  const [feedbackList, setFeedbackList] = useState<FeedbackItem[]>([]);
+  const [loadingFeedback, setLoadingFeedback] = useState(false);
   const typedLang = language as Language;
   const isAdmin = role === "admin";
 
   useEffect(() => {
     if (!isAdmin) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingDev(true);
       fetch("/api/settings")
         .then(r => r.json())
@@ -51,6 +59,21 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
         })
         .catch(() => {})
         .finally(() => setLoadingDev(false));
+    }
+    if (isAdmin) {
+      setLoadingFeedback(true);
+      fetch("/api/settings")
+        .then(r => r.json())
+        .then(data => {
+          if (data.feedback) {
+            try {
+              const parsed = JSON.parse(data.feedback);
+              setFeedbackList(Array.isArray(parsed) ? parsed.reverse() : []);
+            } catch { setFeedbackList([]); }
+          }
+        })
+        .catch(() => {})
+        .finally(() => setLoadingFeedback(false));
     }
   }, [isAdmin]);
 
@@ -322,6 +345,74 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
             ) : (
               <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "0.85rem" }}>
                 {language === "ar" ? "اضغط تعديل لإضافة معلومات المطور" : "Cliquez sur modifier pour ajouter les infos"}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Feedback List - Only for Admin */}
+        {isAdmin && (
+          <div className="card">
+            <h2 style={{ fontWeight: 700, marginBottom: "14px", color: "var(--primary)", fontSize: "0.95rem" }}>
+              💬 {language === "ar" ? "الملاحظات الواردة" : language === "fr" ? "Retours reçus" : "Received Feedback"}
+              {feedbackList.length > 0 && (
+                <span style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: "var(--accent)",
+                  color: "white",
+                  borderRadius: "50%",
+                  width: "20px",
+                  height: "20px",
+                  fontSize: "0.7rem",
+                  fontWeight: 700,
+                  marginInlineStart: "8px",
+                }}>
+                  {feedbackList.length}
+                </span>
+              )}
+            </h2>
+            {loadingFeedback ? (
+              <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "20px" }}>...</div>
+            ) : feedbackList.length === 0 ? (
+              <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "0.85rem", padding: "20px" }}>
+                {language === "ar" ? "لا توجد ملاحظات بعد" : language === "fr" ? "Aucun retour pour l'instant" : "No feedback yet"}
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                {feedbackList.map((item, i) => (
+                  <div key={i} style={{
+                    background: "#f8fafc",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    padding: "12px 14px",
+                  }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
+                      <span style={{
+                        background: item.userRole === "admin" ? "#dbeafe" : "#dcfce7",
+                        color: item.userRole === "admin" ? "#1e40af" : "#166534",
+                        borderRadius: "12px",
+                        padding: "2px 10px",
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                      }}>
+                        {item.userRole === "admin"
+                          ? (language === "ar" ? "أدمن" : "Admin")
+                          : (language === "ar" ? "مستخدم" : language === "fr" ? "Utilisateur" : "User")}
+                      </span>
+                      <span style={{ fontSize: "0.72rem", color: "var(--text-muted)" }}>
+                        {new Date(item.date).toLocaleDateString(language === "ar" ? "ar-DZ" : language === "fr" ? "fr-FR" : "en-US", {
+                          year: "numeric", month: "short", day: "numeric",
+                          hour: "2-digit", minute: "2-digit"
+                        })}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: "0.85rem", color: "var(--text)", lineHeight: "1.5" }}>
+                      {item.text}
+                    </p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
