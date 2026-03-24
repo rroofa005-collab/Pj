@@ -99,7 +99,7 @@ export default function MaintenanceTrackingClient({ lang, role }: { lang: string
                   <th>{t(language, "dueAmount")}</th>
                   <th>{t(language, "status")}</th>
                   <th>{t(language, "note")}</th>
-                  {isAdmin && <th>{t(language, "actions")}</th>}
+                  <th>{t(language, "actions")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -117,26 +117,24 @@ export default function MaintenanceTrackingClient({ lang, role }: { lang: string
                     <td style={{ maxWidth: "150px", fontSize: "0.8rem" }}>
                       {row.statusNote || "—"}
                     </td>
-                    {isAdmin && (
-                      <td>
-                        <div style={{ display: "flex", gap: "4px", flexDirection: "column" }}>
-                          <button
-                            className="btn btn-success btn-sm"
-                            style={{ fontSize: "0.7rem", padding: "3px 6px" }}
-                            onClick={() => updateStatus(row, "ready", "تم الدفع والاستلام")}
-                          >
-                            ✅ {language === "ar" ? "تم الدفع" : "Payé"}
-                          </button>
-                          <button
-                            className="btn btn-warning btn-sm"
-                            style={{ fontSize: "0.7rem", padding: "3px 6px" }}
-                            onClick={() => updateStatus(row, "returned", "تم الإرجاع")}
-                          >
-                            ↩️ {language === "ar" ? "إرجاع" : "Retour"}
-                          </button>
-                        </div>
-                      </td>
-                    )}
+                    <td>
+                      <div style={{ display: "flex", gap: "4px", flexDirection: "column" }}>
+                        <button
+                          className="btn btn-success btn-sm"
+                          style={{ fontSize: "0.7rem", padding: "3px 6px" }}
+                          onClick={() => updateStatus(row, "ready", "تم الدفع والاستلام")}
+                        >
+                          ✅ {language === "ar" ? "تم الدفع" : "Payé"}
+                        </button>
+                        <button
+                          className="btn btn-warning btn-sm"
+                          style={{ fontSize: "0.7rem", padding: "3px 6px" }}
+                          onClick={() => updateStatus(row, "returned", "تم الإرجاع")}
+                        >
+                          ↩️ {language === "ar" ? "إرجاع" : "Retour"}
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
