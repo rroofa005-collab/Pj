@@ -1,19 +1,32 @@
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+import Database from "better-sqlite3";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
 import * as schema from "./schema";
 import path from "path";
-import fs from "fs";
+import { mkdirSync, existsSync } from "fs";
 
-const dbPath = process.env.DB_PATH || "./data/database.db";
+// Lazy singleton — only connect when first query is made
+let _db: BetterSQLite3Database<typeof schema> | null = null;
 
-// Ensure the directory exists
-const dir = path.dirname(path.resolve(dbPath));
-if (!fs.existsSync(dir)) {
-  fs.mkdirSync(dir, { recursive: true });
+function getDb(): BetterSQLite3Database<typeof schema> {
+  if (_db) return _db;
+
+  const dbPath = process.env.DB_PATH || "./data/database.db";
+  const resolvedPath = path.resolve(dbPath);
+
+  const dir = path.dirname(resolvedPath);
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+
+  const sqlite = new Database(resolvedPath);
+  _db = drizzle(sqlite, { schema });
+  return _db;
 }
 
-const client = createClient({
-  url: `file:${path.resolve(dbPath)}`,
+// Proxy so callers use `db` as normal but connection is lazy
+export const db = new Proxy({} as BetterSQLite3Database<typeof schema>, {
+  get(_, prop: string | symbol) {
+    return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
+  },
 });
-
-export const db = drizzle(client, { schema });
