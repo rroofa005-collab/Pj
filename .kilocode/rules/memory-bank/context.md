@@ -1,87 +1,67 @@
-# Active Context: Next.js Starter Template
+# Active Context: R-Manager Pro
 
 ## Current State
 
-**Template Status**: ✅ Ready for development
+**Application Status**: ✅ Fully Built - R-Manager Pro Business Management System
 
-The template is a clean Next.js 16 starter with TypeScript and Tailwind CSS 4. It's ready for AI-assisted expansion to build any type of application.
+Full-featured business management application built with Next.js 16, SQLite (Drizzle ORM), and Tailwind CSS. Admin credentials: username `Roofa`, password `Azer123`.
 
 ## Recently Completed
 
-- [x] Base Next.js 16 setup with App Router
-- [x] TypeScript configuration with strict mode
-- [x] Tailwind CSS 4 integration
-- [x] ESLint configuration
-- [x] Memory bank documentation
-- [x] Recipe system for common features
+- [x] Database setup with Drizzle ORM + SQLite (16 tables)
+- [x] Authentication system (login page, sessions via cookies)
+- [x] Role-based access control (admin / user with granular page permissions)
+- [x] Login page (root route `/`) with R-Manager Pro branding and logo
+- [x] Dashboard with summary cards for all modules
+- [x] Workers page (العمال)
+- [x] Suppliers page (الموردون)
+- [x] Customer Debts page (ديون الزبائن) - auto-calculates remaining
+- [x] Supplier Debts page (ديون الموردون) - auto-calculates status
+- [x] Expenses page (المصاريف)
+- [x] Purchased Phones page (الهواتف المشتراة)
+- [x] Received Amounts page (المبالغ المستلمة)
+- [x] Maintenance page (الصيانة) - auto-calculates totalCost and netProfit
+- [x] Maintenance Tracking page (تتبع الصيانة) - inline status editing
+- [x] Electronic Services page (الخدمات الإلكترونية) - dollar balance tracking
+- [x] Order Tracking page (تتبع الطلبيات) - with wilaya dropdown (58 wilayas)
+- [x] Installments page (الأقساط) - linked to workers
+- [x] Salaries page (الرواتب) - auto-calculates net salary
+- [x] Treasury page (الخزينة)
+- [x] Delivery Tracking page (تتبع التوصيل)
+- [x] Settings page - language switcher (Arabic/French/English)
+- [x] Admin page - full user management with page-level permissions
+- [x] Search + date range filters on every page
+- [x] Export to CSV and Clear Data buttons on every page
+- [x] i18n support (Arabic, French, English) via `/src/lib/i18n.ts`
+- [x] RTL/LTR layout based on language setting
+- [x] RM logo as app favicon and in sidebar/login
 
 ## Current Structure
 
-| File/Directory | Purpose | Status |
-|----------------|---------|--------|
-| `src/app/page.tsx` | Home page | ✅ Ready |
-| `src/app/layout.tsx` | Root layout | ✅ Ready |
-| `src/app/globals.css` | Global styles | ✅ Ready |
-| `.kilocode/` | AI context & recipes | ✅ Ready |
+| Path | Purpose |
+|------|---------|
+| `src/app/page.tsx` | Login page (root) |
+| `src/app/LoginClient.tsx` | Login form client component |
+| `src/app/actions.ts` | Server actions (auth, language) |
+| `src/app/dashboard/` | All dashboard pages |
+| `src/app/api/` | REST API routes for all entities |
+| `src/components/AppLayout.tsx` | Sidebar + main layout |
+| `src/components/PageWrapper.tsx` | Reusable CRUD table component |
+| `src/db/schema.ts` | Database schema (16 tables) |
+| `src/db/index.ts` | Drizzle DB client |
+| `src/db/migrations/` | SQL migration files |
+| `src/lib/auth.ts` | Session management, ALL_PAGES constant |
+| `src/lib/i18n.ts` | Translation strings (AR/FR/EN) |
+| `src/lib/apiHelper.ts` | API route helper utilities |
 
-## Current Focus
+## Admin Credentials
 
-The template is ready. Next steps depend on user requirements:
-
-1. What type of application to build
-2. What features are needed
-3. Design/branding preferences
-
-## Quick Start Guide
-
-### To add a new page:
-
-Create a file at `src/app/[route]/page.tsx`:
-```tsx
-export default function NewPage() {
-  return <div>New page content</div>;
-}
-```
-
-### To add components:
-
-Create `src/components/` directory and add components:
-```tsx
-// src/components/ui/Button.tsx
-export function Button({ children }: { children: React.ReactNode }) {
-  return <button className="px-4 py-2 bg-blue-600 text-white rounded">{children}</button>;
-}
-```
-
-### To add a database:
-
-Follow `.kilocode/recipes/add-database.md`
-
-### To add API routes:
-
-Create `src/app/api/[route]/route.ts`:
-```tsx
-import { NextResponse } from "next/server";
-
-export async function GET() {
-  return NextResponse.json({ message: "Hello" });
-}
-```
-
-## Available Recipes
-
-| Recipe | File | Use Case |
-|--------|------|----------|
-| Add Database | `.kilocode/recipes/add-database.md` | Data persistence with Drizzle + SQLite |
-
-## Pending Improvements
-
-- [ ] Add more recipes (auth, email, etc.)
-- [ ] Add example components
-- [ ] Add testing setup recipe
+- **Username**: Roofa
+- **Password**: Azer123
+- **Role**: admin (full access to all pages)
 
 ## Session History
 
 | Date | Changes |
 |------|---------|
-| Initial | Template created with base setup |
+| 2026-03-24 | Full R-Manager Pro application built from scratch |
