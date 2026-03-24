@@ -60,8 +60,8 @@ Full-featured business management application built with Next.js 16, SQLite (Dri
 - **Password**: Azer123
 - **Role**: admin (full access to all pages)
 
-## Session History
-
 | Date | Changes |
 |------|---------|
 | 2026-03-24 | Full R-Manager Pro application built from scratch |
+| 2026-03-24 | Fixed: Migrated from Bun to Node.js for better-sqlite3 compatibility; Created migrate.js with table creation + admin user setup |
+| 2026-03-24 | Fixed: Admin user credentials verified (Roofa/Azer123 hash: izamy47) |
