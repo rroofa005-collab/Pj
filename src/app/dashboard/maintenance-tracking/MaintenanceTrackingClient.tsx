@@ -6,29 +6,26 @@ interface MaintenanceRecord {
   id: number;
   name: string;
   phoneType: string;
-  totalCost: number;
+  dueAmount: number;
   status: string;
   statusNote: string;
   createdAt: string;
 }
 
-const STATUS_OPTIONS = ["ready", "in_maintenance", "returned"];
 const STATUS_BADGE: Record<string, string> = {
   ready: "badge-success",
   in_maintenance: "badge-warning",
   returned: "badge-secondary",
 };
 
-export default function MaintenanceTrackingClient({ lang }: { lang: string }) {
+export default function MaintenanceTrackingClient({ lang, role }: { lang: string; role: string }) {
   const language = (lang || "ar") as Language;
+  const isAdmin = role === "admin";
   const [rows, setRows] = useState<MaintenanceRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editStatus, setEditStatus] = useState("");
-  const [editNote, setEditNote] = useState("");
 
   const fetchData = useCallback(() => {
     setLoading(true);
@@ -48,13 +45,17 @@ export default function MaintenanceTrackingClient({ lang }: { lang: string }) {
     fetchData();
   }, [fetchData]);
 
-  async function saveStatus(row: MaintenanceRecord) {
+  async function updateStatus(row: MaintenanceRecord, newStatus: string, note: string) {
+    const today = new Date().toLocaleDateString("ar-DZ");
     await fetch("/api/maintenance", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...row, status: editStatus, statusNote: editNote }),
+      body: JSON.stringify({ 
+        ...row, 
+        status: newStatus, 
+        statusNote: `${note} - ${today}` 
+      }),
     });
-    setEditingId(null);
     fetchData();
   }
 
@@ -64,9 +65,9 @@ export default function MaintenanceTrackingClient({ lang }: { lang: string }) {
         <h1 className="page-title">🔍 {t(language, "maintenanceTracking")}</h1>
       </div>
 
-      <div className="card" style={{ marginBottom: "16px", padding: "12px 16px" }}>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-end" }}>
-          <div style={{ flex: "1", minWidth: "180px" }}>
+      <div className="card" style={{ marginBottom: "12px", padding: "10px 14px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div style={{ flex: "1", minWidth: "140px" }}>
             <label className="form-label">{t(language, "search")}</label>
             <input className="form-control" value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t(language, "search") + "..."} />
           </div>
@@ -85,9 +86,9 @@ export default function MaintenanceTrackingClient({ lang }: { lang: string }) {
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
           {loading ? (
-            <div style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)" }}>...</div>
+            <div style={{ padding: "24px", textAlign: "center", color: "var(--text-muted)" }}>...</div>
           ) : rows.length === 0 ? (
-            <div style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)" }}>{t(language, "noData")}</div>
+            <div style={{ padding: "24px", textAlign: "center", color: "var(--text-muted)" }}>{t(language, "noData")}</div>
           ) : (
             <table className="data-table">
               <thead>
@@ -95,68 +96,47 @@ export default function MaintenanceTrackingClient({ lang }: { lang: string }) {
                   <th>#</th>
                   <th>{t(language, "name")}</th>
                   <th>{t(language, "phoneType")}</th>
-                  <th>{t(language, "totalCost")}</th>
+                  <th>{t(language, "dueAmount")}</th>
                   <th>{t(language, "status")}</th>
                   <th>{t(language, "note")}</th>
-                  <th>{t(language, "date")}</th>
-                  <th>{t(language, "actions")}</th>
+                  {isAdmin && <th>{t(language, "actions")}</th>}
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row, idx) => (
                   <tr key={row.id}>
-                    <td style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{idx + 1}</td>
-                    <td>{row.name}</td>
+                    <td style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{idx + 1}</td>
+                    <td style={{ fontWeight: 600 }}>{row.name}</td>
                     <td>{row.phoneType}</td>
-                    <td>{Number(row.totalCost).toLocaleString()}</td>
+                    <td style={{ fontWeight: 600, color: "var(--primary)" }}>{Number(row.dueAmount).toLocaleString()} DA</td>
                     <td>
-                      {editingId === row.id ? (
-                        <select
-                          className="form-control"
-                          value={editStatus}
-                          onChange={(e) => setEditStatus(e.target.value)}
-                          style={{ minWidth: "120px" }}
-                        >
-                          {STATUS_OPTIONS.map((s) => (
-                            <option key={s} value={s}>{t(language, s === "in_maintenance" ? "inMaintenance" : s)}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <span className={`badge ${STATUS_BADGE[row.status] || "badge-secondary"}`}>
-                          {t(language, row.status === "in_maintenance" ? "inMaintenance" : row.status)}
-                        </span>
-                      )}
+                      <span className={`badge ${STATUS_BADGE[row.status] || "badge-secondary"}`}>
+                        {t(language, row.status === "in_maintenance" ? "inMaintenance" : row.status)}
+                      </span>
                     </td>
-                    <td>
-                      {editingId === row.id ? (
-                        <input
-                          className="form-control"
-                          value={editNote}
-                          onChange={(e) => setEditNote(e.target.value)}
-                          style={{ minWidth: "160px" }}
-                        />
-                      ) : (
-                        row.statusNote || "—"
-                      )}
+                    <td style={{ maxWidth: "150px", fontSize: "0.8rem" }}>
+                      {row.statusNote || "—"}
                     </td>
-                    <td style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                      {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "—"}
-                    </td>
-                    <td>
-                      {editingId === row.id ? (
-                        <div style={{ display: "flex", gap: "6px" }}>
-                          <button className="btn btn-success btn-sm" onClick={() => saveStatus(row)}>{t(language, "save")}</button>
-                          <button className="btn btn-secondary btn-sm" onClick={() => setEditingId(null)}>{t(language, "cancel")}</button>
+                    {isAdmin && (
+                      <td>
+                        <div style={{ display: "flex", gap: "4px", flexDirection: "column" }}>
+                          <button
+                            className="btn btn-success btn-sm"
+                            style={{ fontSize: "0.7rem", padding: "3px 6px" }}
+                            onClick={() => updateStatus(row, "ready", "تم الدفع والاستلام")}
+                          >
+                            ✅ {language === "ar" ? "تم الدفع" : "Payé"}
+                          </button>
+                          <button
+                            className="btn btn-warning btn-sm"
+                            style={{ fontSize: "0.7rem", padding: "3px 6px" }}
+                            onClick={() => updateStatus(row, "returned", "تم الإرجاع")}
+                          >
+                            ↩️ {language === "ar" ? "إرجاع" : "Retour"}
+                          </button>
                         </div>
-                      ) : (
-                        <button
-                          className="btn btn-primary btn-sm"
-                          onClick={() => { setEditingId(row.id); setEditStatus(row.status); setEditNote(row.statusNote || ""); }}
-                        >
-                          ✏️ {t(language, "edit")}
-                        </button>
-                      )}
-                    </td>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

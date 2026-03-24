@@ -14,8 +14,9 @@ interface ServiceRecord {
   createdAt: string;
 }
 
-export default function ElectronicServicesClient({ lang }: { lang: string }) {
+export default function ElectronicServicesClient({ lang, role }: { lang: string; role: string }) {
   const language = (lang || "ar") as Language;
+  const isAdmin = role === "admin";
   const [rows, setRows] = useState<ServiceRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -50,7 +51,7 @@ export default function ElectronicServicesClient({ lang }: { lang: string }) {
 
   function openAdd() {
     setEditRow(null);
-    setForm({ receivedDollar: 0, name: "", serviceType: "", amountDollar: 0, amountDinar: 0, status: "paid" });
+    setForm({ receivedDollar: isAdmin ? 0 : 0, name: "", serviceType: "", amountDollar: 0, amountDinar: 0, status: "paid" });
     setShowModal(true);
   }
 
@@ -62,8 +63,18 @@ export default function ElectronicServicesClient({ lang }: { lang: string }) {
 
   async function handleSave() {
     setSaving(true);
-    const remaining = currentRemaining + Number(form.receivedDollar) - Number(form.amountDollar);
-    const body = { ...form, remainingDollar: remaining, ...(editRow ? { id: editRow.id } : {}) };
+    const receivedVal = isAdmin ? Number(form.receivedDollar) : 0;
+    const remaining = currentRemaining + receivedVal - Number(form.amountDollar);
+    const body = { 
+      receivedDollar: isAdmin ? receivedVal : 0, 
+      remainingDollar: remaining, 
+      name: form.name, 
+      serviceType: form.serviceType, 
+      amountDollar: form.amountDollar, 
+      amountDinar: form.amountDinar, 
+      status: form.status,
+      ...(editRow ? { id: editRow.id } : {}) 
+    };
     await fetch("/api/electronic-services", {
       method: editRow ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
@@ -103,22 +114,22 @@ export default function ElectronicServicesClient({ lang }: { lang: string }) {
       </div>
 
       {/* Dollar summary */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "16px" }}>
-        <div className="card" style={{ textAlign: "center" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "12px" }}>
+        <div className="card" style={{ textAlign: "center", padding: "12px" }}>
           <div className="form-label">{t(language, "receivedDollar")}</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#10b981" }}>${totalReceived.toLocaleString()}</div>
+          <div style={{ fontSize: "1.3rem", fontWeight: 700, color: "#10b981" }}>${totalReceived.toLocaleString()}</div>
         </div>
-        <div className="card" style={{ textAlign: "center" }}>
+        <div className="card" style={{ textAlign: "center", padding: "12px" }}>
           <div className="form-label">{t(language, "remainingDollar")}</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: 700, color: currentRemaining >= 0 ? "#3b82f6" : "#ef4444" }}>
+          <div style={{ fontSize: "1.3rem", fontWeight: 700, color: currentRemaining >= 0 ? "#3b82f6" : "#ef4444" }}>
             ${currentRemaining.toLocaleString()}
           </div>
         </div>
       </div>
 
-      <div className="card" style={{ marginBottom: "16px", padding: "12px 16px" }}>
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "flex-end" }}>
-          <div style={{ flex: 1, minWidth: "180px" }}>
+      <div className="card" style={{ marginBottom: "12px", padding: "10px 14px" }}>
+        <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div style={{ flex: 1, minWidth: "140px" }}>
             <label className="form-label">{t(language, "search")}</label>
             <input className="form-control" value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
@@ -136,8 +147,8 @@ export default function ElectronicServicesClient({ lang }: { lang: string }) {
 
       <div className="card" style={{ padding: 0, overflow: "hidden" }}>
         <div style={{ overflowX: "auto" }}>
-          {loading ? <div style={{ padding: "32px", textAlign: "center" }}>...</div> :
-            rows.length === 0 ? <div style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)" }}>{t(language, "noData")}</div> : (
+          {loading ? <div style={{ padding: "24px", textAlign: "center" }}>...</div> :
+            rows.length === 0 ? <div style={{ padding: "24px", textAlign: "center", color: "var(--text-muted)" }}>{t(language, "noData")}</div> : (
               <table className="data-table">
                 <thead>
                   <tr>
@@ -155,22 +166,24 @@ export default function ElectronicServicesClient({ lang }: { lang: string }) {
                 <tbody>
                   {rows.map((row, idx) => (
                     <tr key={row.id}>
-                      <td style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{idx + 1}</td>
+                      <td style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{idx + 1}</td>
                       <td>{row.name}</td>
                       <td>{row.serviceType}</td>
                       <td>${Number(row.amountDollar).toLocaleString()}</td>
                       <td>{Number(row.amountDinar).toLocaleString()} DA</td>
-                      <td>${Number(row.remainingDollar).toLocaleString()}</td>
+                      <td style={{ fontWeight: row.remainingDollar >= 0 ? 600 : 600, color: row.remainingDollar >= 0 ? "var(--primary)" : "var(--danger)" }}>
+                        ${Number(row.remainingDollar).toLocaleString()}
+                      </td>
                       <td>
                         <span className={`badge ${row.status === "paid" ? "badge-success" : "badge-danger"}`}>
                           {t(language, row.status)}
                         </span>
                       </td>
-                      <td style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+                      <td style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
                         {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : "—"}
                       </td>
                       <td>
-                        <div style={{ display: "flex", gap: "6px" }}>
+                        <div style={{ display: "flex", gap: "4px" }}>
                           <button className="btn btn-secondary btn-sm" onClick={() => openEdit(row)}>✏️</button>
                           <button className="btn btn-danger btn-sm" onClick={() => handleDelete(row.id)}>🗑</button>
                         </div>
@@ -186,14 +199,22 @@ export default function ElectronicServicesClient({ lang }: { lang: string }) {
       {showModal && (
         <div className="modal-overlay" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
           <div className="modal-box">
-            <h2 style={{ fontWeight: 700, marginBottom: "20px", color: "var(--primary)" }}>
+            <h2 style={{ fontWeight: 700, marginBottom: "16px", color: "var(--primary)", fontSize: "1rem" }}>
               {editRow ? t(language, "edit") : t(language, "add")}
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
-              <div>
-                <label className="form-label">{t(language, "receivedDollar")}</label>
-                <input className="form-control" type="number" value={form.receivedDollar} onChange={(e) => setForm({ ...form, receivedDollar: Number(e.target.value) })} step="any" />
-              </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
+              {isAdmin && (
+                <div>
+                  <label className="form-label">{t(language, "receivedDollar")}</label>
+                  <input 
+                    className="form-control" 
+                    type="number" 
+                    value={form.receivedDollar} 
+                    onChange={(e) => setForm({ ...form, receivedDollar: Number(e.target.value) })} 
+                    step="any" 
+                  />
+                </div>
+              )}
               <div>
                 <label className="form-label">{t(language, "name")}</label>
                 <input className="form-control" type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
@@ -218,7 +239,7 @@ export default function ElectronicServicesClient({ lang }: { lang: string }) {
                 </select>
               </div>
             </div>
-            <div style={{ display: "flex", gap: "10px", justifyContent: "flex-end", marginTop: "20px" }}>
+            <div style={{ display: "flex", gap: "8px", justifyContent: "flex-end", marginTop: "16px" }}>
               <button className="btn btn-secondary" onClick={() => setShowModal(false)}>{t(language, "cancel")}</button>
               <button className="btn btn-primary" onClick={handleSave} disabled={saving}>{saving ? "..." : t(language, "save")}</button>
             </div>
