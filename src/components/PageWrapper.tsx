@@ -31,10 +31,11 @@ interface PageWrapperProps {
   defaultValues?: Record<string, unknown>;
   onBeforeSave?: (data: Record<string, unknown>) => Record<string, unknown>;
   renderCustomRow?: (row: Record<string, unknown>, onEdit: () => void, onDelete: () => void, lang: Language) => React.ReactNode;
+  summaryFromRows?: (rows: Record<string, unknown>[]) => React.ReactNode;
 }
 
 export default function PageWrapper({
-  title, apiPath, columns, fields, lang, role = "user", summary, extraTopContent, defaultValues = {}, onBeforeSave, renderCustomRow
+  title, apiPath, columns, fields, lang, role = "user", summary, extraTopContent, defaultValues = {}, onBeforeSave, renderCustomRow, summaryFromRows
 }: PageWrapperProps) {
   const language = (lang || "ar") as Language;
   const isAdmin = role === "admin";
@@ -170,6 +171,9 @@ export default function PageWrapper({
 
       {/* Summary */}
       {summary && <div style={{ marginBottom: "16px" }}>{summary}</div>}
+      {summaryFromRows && rows.length > 0 && (
+        <div style={{ marginBottom: "16px" }}>{summaryFromRows(rows)}</div>
+      )}
       {extraTopContent && <div style={{ marginBottom: "16px" }}>{extraTopContent}</div>}
 
       {/* Filters */}
