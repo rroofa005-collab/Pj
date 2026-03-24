@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { t, type Language } from "@/lib/i18n";
@@ -25,6 +25,12 @@ export default function LoginClient({ lang }: Props) {
   }
   const language = currentLang as Language;
   const dir = language === "ar" ? "rtl" : "ltr";
+
+  // Update full page direction and language when language changes
+  useEffect(() => {
+    document.documentElement.setAttribute("dir", dir);
+    document.documentElement.setAttribute("lang", language);
+  }, [dir, language]);
 
   const langs = [
     { code: "ar", flag: "🇩🇿", label: "العربية", sub: "Arabic" },
@@ -66,6 +72,8 @@ export default function LoginClient({ lang }: Props) {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ key: "language", value: newLang }),
     });
+    // Refresh server components so the new language is applied everywhere
+    router.refresh();
   }
 
   const currentLangObj = langs.find(l => l.code === currentLang) || langs[0];

@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { t, type Language } from "@/lib/i18n";
 import Image from "next/image";
 
@@ -31,6 +32,7 @@ interface FeedbackItem {
 }
 
 export default function SettingsClient({ lang, role }: { lang: string; role: string }) {
+  const router = useRouter();
   const [language, setLanguage] = useState(lang || "ar");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -44,6 +46,13 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
   const [loadingFeedback, setLoadingFeedback] = useState(false);
   const typedLang = language as Language;
   const isAdmin = role === "admin";
+  const dir = language === "ar" ? "rtl" : "ltr";
+
+  // Update full page direction and language immediately when selection changes
+  useEffect(() => {
+    document.documentElement.setAttribute("dir", dir);
+    document.documentElement.setAttribute("lang", language);
+  }, [dir, language]);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -88,7 +97,8 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-    setTimeout(() => window.location.reload(), 500);
+    // Refresh server components so sidebar and all layout components use the new language
+    router.refresh();
   }
 
   async function saveDevInfo() {
