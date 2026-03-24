@@ -5,13 +5,11 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-"start": "node src/db/migrate.js; next start -p ${PORT:-3000}",
-    "build": "next build",
+    "start": "node src/db/migrate.js && next start -p ${PORT:-3000}",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "node src/db/migrate.js",
-    "db:migrate:ts": "bun run src/db/migrate.ts"
+    "db:migrate": "node src/db/migrate.js"
   },
   "dependencies": {
     "@kilocode/app-builder-db": "github:Kilo-Org/app-builder-db#main",

@@ -135,6 +135,7 @@ export const translations: Record<Language, Record<string, string>> = {
     allDaysAllowed: "كل الأيام",
     accessDenied: "غير مسموح بالدخول في هذا الوقت",
     accessDeniedDay: "غير مسموح بالدخول في هذا اليوم",
+    dbNotReady: "قاعدة البيانات غير جاهزة، يرجى المحاولة لاحقاً",
   },
   fr: {
     appName: "R-Manager Pro",
@@ -270,6 +271,7 @@ export const translations: Record<Language, Record<string, string>> = {
     allDaysAllowed: "Tous les jours",
     accessDenied: "Accès refusé à cette heure",
     accessDeniedDay: "Accès refusé ce jour",
+    dbNotReady: "Base de données non prête, réessayez plus tard",
   },
   en: {
     appName: "R-Manager Pro",
@@ -405,6 +407,7 @@ export const translations: Record<Language, Record<string, string>> = {
     allDaysAllowed: "All Days",
     accessDenied: "Access denied at this time",
     accessDeniedDay: "Access denied on this day",
+    dbNotReady: "Database not ready, please try again later",
   },
 };
 

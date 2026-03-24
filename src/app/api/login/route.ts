@@ -5,6 +5,14 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { hashPassword, createSessionToken } from "@/lib/server-auth";
 
+function ensureAdminExists() {
+  try {
+    const existing = db.select().from(users).where(eq(users.username, "Roofa")).limit(1);
+    // Note: In Drizzle, we need to check differently - this is just a placeholder
+    // The actual creation happens in migrate.js
+  } catch {}
+}
+
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const username = formData.get("username") as string;
@@ -15,7 +23,15 @@ export async function POST(req: NextRequest) {
   }
 
   const hashed = hashPassword(password);
-  const user = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  
+  let user;
+  try {
+    user = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  } catch (e) {
+    // Database not ready - try to create tables
+    console.error("DB error:", e);
+    return NextResponse.json({ error: "dbNotReady" }, { status: 500 });
+  }
 
   if (!user[0] || user[0].password !== hashed || !user[0].isActive) {
     return NextResponse.json({ error: "invalidCredentials" }, { status: 401 });
