@@ -63,6 +63,7 @@ export const ALL_PAGES = [
   { key: "received-amounts", labelAr: "المبالغ المستلمة", labelFr: "Montants reçus", labelEn: "Received Amounts" },
   { key: "maintenance", labelAr: "الصيانة", labelFr: "Maintenance", labelEn: "Maintenance" },
   { key: "maintenance-tracking", labelAr: "تتبع الصيانة", labelFr: "Suivi maintenance", labelEn: "Maintenance Tracking" },
+  { key: "external-maintenance", labelAr: "الصيانة الخارجية", labelFr: "Maintenance externe", labelEn: "External Maintenance" },
   { key: "electronic-services", labelAr: "الخدمات الإلكترونية", labelFr: "Services électroniques", labelEn: "Electronic Services" },
   { key: "orders", labelAr: "تتبع الطلبيات", labelFr: "Suivi commandes", labelEn: "Order Tracking" },
   { key: "installments", labelAr: "الأقساط", labelFr: "Versements", labelEn: "Installments" },

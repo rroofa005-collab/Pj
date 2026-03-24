@@ -199,3 +199,20 @@ export const appSettings = sqliteTable("app_settings", {
   key: text("key").notNull().unique(),
   value: text("value").notNull(),
 });
+
+// External Maintenance (الصيانة الخارجية)
+export const externalMaintenance = sqliteTable("external_maintenance", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  name: text("name").notNull(),
+  phone: text("phone"),
+  phoneType: text("phone_type"),
+  fault: text("fault"),
+  repairCost: real("repair_cost").notNull().default(0),
+  otherCost: real("other_cost").notNull().default(0),
+  totalCost: real("total_cost").notNull().default(0),
+  amountDue: real("amount_due").notNull().default(0),
+  technicianName: text("technician_name"),
+  phoneStatus: text("phone_status").notNull().default("in_maintenance"), // 'in_maintenance' | 'ready' | 'returned'
+  paymentStatus: text("payment_status").notNull().default("unpaid"), // 'paid' | 'unpaid'
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+});

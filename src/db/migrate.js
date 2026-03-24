@@ -216,6 +216,23 @@ try {
     value TEXT NOT NULL
   )`);
 
+  // External Maintenance table
+  sqlite.exec(`CREATE TABLE IF NOT EXISTS external_maintenance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    name TEXT NOT NULL,
+    phone TEXT,
+    phone_type TEXT,
+    fault TEXT,
+    repair_cost REAL NOT NULL DEFAULT 0,
+    other_cost REAL NOT NULL DEFAULT 0,
+    total_cost REAL NOT NULL DEFAULT 0,
+    amount_due REAL NOT NULL DEFAULT 0,
+    technician_name TEXT,
+    phone_status TEXT NOT NULL DEFAULT 'in_maintenance',
+    payment_status TEXT NOT NULL DEFAULT 'unpaid',
+    created_at INTEGER
+  )`);
+
   console.log("✅ All tables created");
 
   // Create default admin user if not exists

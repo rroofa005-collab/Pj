@@ -23,6 +23,7 @@ const ALL_NAV: NavItem[] = [
   { key: "receivedAmounts", icon: "💰", href: "/dashboard/received-amounts" },
   { key: "maintenance", icon: "🔧", href: "/dashboard/maintenance" },
   { key: "maintenanceTracking", icon: "🔍", href: "/dashboard/maintenance-tracking" },
+  { key: "externalMaintenance", icon: "🏪", href: "/dashboard/external-maintenance" },
   { key: "electronicServices", icon: "⚡", href: "/dashboard/electronic-services" },
   { key: "orders", icon: "📋", href: "/dashboard/orders" },
   { key: "installments", icon: "💵", href: "/dashboard/installments" },

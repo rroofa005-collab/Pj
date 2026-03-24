@@ -429,6 +429,16 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
           </div>
         )}
 
+        {/* Access Control - Only for Admin */}
+        {isAdmin && (
+          <div className="card">
+            <h2 style={{ fontWeight: 700, marginBottom: "14px", color: "var(--primary)", fontSize: "0.95rem" }}>
+              🔐 {t(typedLang, "accessControl")}
+            </h2>
+            <AccessControlSettings language={language} />
+          </div>
+        )}
+
         {/* App Info */}
         <div className="card">
           <h2 style={{ fontWeight: 700, marginBottom: "14px", color: "var(--primary)", fontSize: "0.95rem" }}>
@@ -447,6 +457,164 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+interface AccessControlSettingsProps {
+  language: string;
+}
+
+function AccessControlSettings({ language }: AccessControlSettingsProps) {
+  const [allowedDays, setAllowedDays] = useState<string[]>([]);
+  const [timeStart, setTimeStart] = useState("00:00");
+  const [timeEnd, setTimeEnd] = useState("23:59");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const days = [
+    { value: "0", label: language === "ar" ? "الأحد" : language === "fr" ? "Dimanche" : "Sunday" },
+    { value: "1", label: language === "ar" ? "الاثنين" : language === "fr" ? "Lundi" : "Monday" },
+    { value: "2", label: language === "ar" ? "الثلاثاء" : language === "fr" ? "Mardi" : "Tuesday" },
+    { value: "3", label: language === "ar" ? "الأربعاء" : language === "fr" ? "Mercredi" : "Wednesday" },
+    { value: "4", label: language === "ar" ? "الخميس" : language === "fr" ? "Jeudi" : "Thursday" },
+    { value: "5", label: language === "ar" ? "الجمعة" : language === "fr" ? "Vendredi" : "Friday" },
+    { value: "6", label: language === "ar" ? "السبت" : language === "fr" ? "Samedi" : "Saturday" },
+  ];
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then(r => r.json())
+      .then(data => {
+        if (data.accessControl) {
+          try {
+            const parsed = JSON.parse(data.accessControl);
+            if (parsed.days) setAllowedDays(parsed.days);
+            if (parsed.timeStart) setTimeStart(parsed.timeStart);
+            if (parsed.timeEnd) setTimeEnd(parsed.timeEnd);
+          } catch {}
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
+
+  function toggleDay(day: string) {
+    if (allowedDays.includes(day)) {
+      setAllowedDays(allowedDays.filter(d => d !== day));
+    } else {
+      setAllowedDays([...allowedDays, day]);
+    }
+  }
+
+  async function saveAccessControl() {
+    setSaving(true);
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        key: "accessControl",
+        value: JSON.stringify({ days: allowedDays, timeStart, timeEnd })
+      }),
+    });
+    setSaving(false);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  }
+
+  const isAllDaysSelected = days.length === allowedDays.length;
+
+  if (loading) {
+    return <div style={{ textAlign: "center", color: "var(--text-muted)", padding: "20px" }}>...</div>;
+  }
+
+  return (
+    <div style={{ display: "grid", gap: "16px" }}>
+      <div>
+        <label style={{ fontWeight: 600, fontSize: "0.85rem", marginBottom: "8px", display: "block" }}>
+          {language === "ar" ? "الأيام المسموح بها" : language === "fr" ? "Jours autorisés" : "Allowed Days"}
+        </label>
+        <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+          {days.map(day => (
+            <button
+              key={day.value}
+              onClick={() => toggleDay(day.value)}
+              style={{
+                padding: "8px 14px",
+                borderRadius: "8px",
+                border: `2px solid ${allowedDays.includes(day.value) ? "var(--accent)" : "var(--border)"}`,
+                background: allowedDays.includes(day.value) ? "#eff6ff" : "white",
+                color: allowedDays.includes(day.value) ? "var(--accent)" : "var(--text)",
+                fontWeight: 600,
+                fontSize: "0.85rem",
+                cursor: "pointer",
+              }}
+            >
+              {day.label}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={() => isAllDaysSelected ? setAllowedDays([]) : setAllowedDays(days.map(d => d.value))}
+          style={{
+            marginTop: "8px",
+            background: "none",
+            border: "none",
+            color: "var(--accent)",
+            fontSize: "0.8rem",
+            cursor: "pointer",
+            textDecoration: "underline",
+          }}
+        >
+          {isAllDaysSelected 
+            ? (language === "ar" ? "إلغاء الكل" : language === "fr" ? "Tout désélectionner" : "Deselect All")
+            : (language === "ar" ? "اختيار الكل" : language === "fr" ? "Tout sélectionner" : "Select All")
+          }
+        </button>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+        <div>
+          <label className="form-label">{language === "ar" ? "وقت البدء" : language === "fr" ? "Heure de début" : "Start Time"}</label>
+          <input
+            className="form-control"
+            type="time"
+            value={timeStart}
+            onChange={e => setTimeStart(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="form-label">{language === "ar" ? "وقت الانتهاء" : language === "fr" ? "Heure de fin" : "End Time"}</label>
+          <input
+            className="form-control"
+            type="time"
+            value={timeEnd}
+            onChange={e => setTimeEnd(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <button
+        className="btn btn-primary"
+        onClick={saveAccessControl}
+        disabled={saving}
+        style={{ justifyContent: "center" }}
+      >
+        {saving ? "..." : saved ? "✅" : t(language as Language, "save")}
+      </button>
+
+      {allowedDays.length === 0 && (
+        <div style={{ 
+          padding: "10px", 
+          background: "#fef3c7", 
+          borderRadius: "8px", 
+          fontSize: "0.8rem",
+          color: "#92400e"
+        }}>
+          ⚠️ {language === "ar" ? "لم يتم اختيار أي أيام - التطبيق متاح دائماً" : language === "fr" ? "Aucun jour sélectionné - l'application est toujours disponible" : "No days selected - app is always available"}
+        </div>
+      )}
     </div>
   );
 }
