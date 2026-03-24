@@ -136,6 +136,7 @@ export const translations: Record<Language, Record<string, string>> = {
     accessDenied: "غير مسموح بالدخول في هذا الوقت",
     accessDeniedDay: "غير مسموح بالدخول في هذا اليوم",
     dbNotReady: "قاعدة البيانات غير جاهزة، يرجى المحاولة لاحقاً",
+    dbError: "خطأ في قاعدة البيانات",
   },
   fr: {
     appName: "R-Manager Pro",
@@ -272,6 +273,7 @@ export const translations: Record<Language, Record<string, string>> = {
     accessDenied: "Accès refusé à cette heure",
     accessDeniedDay: "Accès refusé ce jour",
     dbNotReady: "Base de données non prête, réessayez plus tard",
+    dbError: "Erreur de base de données",
   },
   en: {
     appName: "R-Manager Pro",
@@ -408,6 +410,7 @@ export const translations: Record<Language, Record<string, string>> = {
     accessDenied: "Access denied at this time",
     accessDeniedDay: "Access denied on this day",
     dbNotReady: "Database not ready, please try again later",
+    dbError: "Database error",
   },
 };
 
