@@ -108,7 +108,7 @@ export default function AppLayout({ children, lang, role, permissions, username 
         }}
       >
         {/* Header */}
-        <div style={{ padding: "16px", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ padding: "16px", borderBottom: "1px solid rgba(138,168,200,0.2)", display: "flex", alignItems: "center", gap: "10px", background: "rgba(0,0,0,0.2)" }}>
           <Image
             src="https://assets.kiloapps.io/user_dd4037cd-bc12-4818-a841-664202163b63/7ba274dd-eee4-4356-81ed-3609f94a4da8/1b601af4-0e53-4e3a-a63c-8b45dae62cb2.png"
             alt="RM"
@@ -116,7 +116,7 @@ export default function AppLayout({ children, lang, role, permissions, username 
             height={36}
             style={{ borderRadius: "8px" }}
           />
-          <span style={{ color: "white", fontWeight: 700, fontSize: "0.95rem" }}>
+          <span style={{ color: "#c5d4e3", fontWeight: 700, fontSize: "0.95rem", letterSpacing: "0.3px" }}>
             R-Manager Pro
           </span>
           <button
@@ -136,9 +136,9 @@ export default function AppLayout({ children, lang, role, permissions, username 
         </div>
 
         {/* User info */}
-        <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-          <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.75rem" }}>{isAdmin ? t(language, "roleAdmin") : t(language, "roleUser")}</div>
-          <div style={{ color: "white", fontSize: "0.875rem", fontWeight: 600 }}>{username}</div>
+        <div style={{ padding: "10px 16px", borderBottom: "1px solid rgba(138,168,200,0.15)" }}>
+          <div style={{ color: "rgba(138,168,200,0.7)", fontSize: "0.75rem" }}>{isAdmin ? t(language, "roleAdmin") : t(language, "roleUser")}</div>
+          <div style={{ color: "#e8f0f8", fontSize: "0.875rem", fontWeight: 600 }}>{username}</div>
         </div>
 
         {/* Nav */}
@@ -160,7 +160,7 @@ export default function AppLayout({ children, lang, role, permissions, username 
         </nav>
 
         {/* Logout */}
-        <div style={{ padding: "12px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+        <div style={{ padding: "12px", borderTop: "1px solid rgba(138,168,200,0.15)" }}>
           <button
             onClick={handleLogout}
             className="sidebar-link"
@@ -169,7 +169,7 @@ export default function AppLayout({ children, lang, role, permissions, username 
             <span>🚪</span>
             <span>{t(language, "logout")}</span>
           </button>
-          <div style={{ color: "rgba(255,255,255,0.35)", fontSize: "0.65rem", textAlign: "center", marginTop: "8px" }}>
+          <div style={{ color: "rgba(138,168,200,0.35)", fontSize: "0.65rem", textAlign: "center", marginTop: "8px" }}>
             Dev By Adouani Abderraouf
           </div>
         </div>
@@ -200,10 +200,10 @@ export default function AppLayout({ children, lang, role, permissions, username 
             width: "56px",
             height: "56px",
             borderRadius: "50%",
-            background: "var(--primary)",
-            color: "white",
-            border: "none",
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+            background: "linear-gradient(135deg, #0d1f35, #1e4876)",
+            color: "#c5d4e3",
+            border: "1px solid rgba(138,168,200,0.3)",
+            boxShadow: "0 4px 14px rgba(0,0,0,0.4)",
             fontSize: "1.5rem",
             cursor: "pointer",
             zIndex: 30,
