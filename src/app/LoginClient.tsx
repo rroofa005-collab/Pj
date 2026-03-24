@@ -92,55 +92,55 @@ export default function LoginClient({ lang }: Props) {
           width: 100%;
           padding: 12px 16px;
           border-radius: 12px;
-          border: 1.5px solid rgba(255,255,255,0.3);
-          background: rgba(255,255,255,0.15);
-          color: white;
+          border: 1.5px solid rgba(138,168,200,0.35);
+          background: rgba(13,31,53,0.45);
+          color: #e8f0f8;
           font-size: 0.95rem;
           outline: none;
           transition: all 0.2s;
           backdrop-filter: blur(4px);
           box-sizing: border-box;
         }
-        .login-input::placeholder { color: rgba(255,255,255,0.5); }
+        .login-input::placeholder { color: rgba(138,168,200,0.55); }
         .login-input:focus {
-          border-color: rgba(255,255,255,0.7);
-          background: rgba(255,255,255,0.22);
-          box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+          border-color: rgba(138,168,200,0.75);
+          background: rgba(13,31,53,0.6);
+          box-shadow: 0 0 0 3px rgba(43,96,176,0.25);
         }
         .login-label {
           display: block;
           margin-bottom: 8px;
           font-size: 0.88rem;
           font-weight: 600;
-          color: rgba(255,255,255,0.85);
+          color: rgba(197,212,227,0.9);
         }
         .login-btn {
           width: 100%;
           padding: 13px;
           border-radius: 12px;
           border: none;
-          background: white;
-          color: #6d28d9;
+          background: linear-gradient(135deg, #c5d4e3 0%, #8aa8c8 50%, #c5d4e3 100%);
+          color: #0d1f35;
           font-size: 1rem;
           font-weight: 800;
           cursor: pointer;
           transition: all 0.2s;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+          box-shadow: 0 4px 18px rgba(0,0,0,0.35);
           letter-spacing: 0.3px;
         }
         .login-btn:hover:not(:disabled) {
-          background: #f5f3ff;
+          background: linear-gradient(135deg, #dde8f2 0%, #a8c4dc 50%, #dde8f2 100%);
           transform: translateY(-1px);
-          box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+          box-shadow: 0 6px 22px rgba(0,0,0,0.4);
         }
         .login-btn:disabled { opacity: 0.7; cursor: not-allowed; }
         .lang-btn {
           position: absolute;
           top: 20px;
           z-index: 10;
-          background: rgba(255,255,255,0.15);
-          border: 1px solid rgba(255,255,255,0.3);
-          color: white;
+          background: rgba(13,31,53,0.5);
+          border: 1px solid rgba(138,168,200,0.35);
+          color: #c5d4e3;
           padding: 8px 14px;
           border-radius: 20px;
           cursor: pointer;
@@ -152,15 +152,14 @@ export default function LoginClient({ lang }: Props) {
           backdrop-filter: blur(8px);
           transition: all 0.2s;
         }
-        .lang-btn:hover { background: rgba(255,255,255,0.25); }
+        .lang-btn:hover { background: rgba(13,31,53,0.7); }
       `}</style>
 
       <div
         dir={dir}
         style={{
           minHeight: "100vh",
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 30%, #f093fb 60%, #f5576c 80%, #4facfe 100%)",
-          backgroundSize: "400% 400%",
+          background: "linear-gradient(135deg, #0a1628 0%, #0d1f35 20%, #162d4a 45%, #1e4876 70%, #2b5f8e 90%, #0d1f35 100%)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -174,7 +173,7 @@ export default function LoginClient({ lang }: Props) {
         <div style={{
           position: "absolute", top: "-20%", left: "-10%",
           width: "500px", height: "500px", borderRadius: "50%",
-          background: "rgba(102,126,234,0.5)",
+          background: "rgba(30,72,118,0.6)",
           filter: "blur(80px)",
           animation: "float1 12s ease-in-out infinite",
           pointerEvents: "none",
@@ -182,7 +181,7 @@ export default function LoginClient({ lang }: Props) {
         <div style={{
           position: "absolute", bottom: "-20%", right: "-10%",
           width: "600px", height: "600px", borderRadius: "50%",
-          background: "rgba(240,147,251,0.4)",
+          background: "rgba(43,95,142,0.5)",
           filter: "blur(90px)",
           animation: "float2 15s ease-in-out infinite",
           pointerEvents: "none",
@@ -190,7 +189,7 @@ export default function LoginClient({ lang }: Props) {
         <div style={{
           position: "absolute", top: "40%", left: "40%",
           width: "350px", height: "350px", borderRadius: "50%",
-          background: "rgba(79,172,254,0.35)",
+          background: "rgba(138,168,200,0.2)",
           filter: "blur(70px)",
           animation: "float3 10s ease-in-out infinite",
           pointerEvents: "none",
@@ -228,7 +227,7 @@ export default function LoginClient({ lang }: Props) {
             >
               <div style={{ textAlign: "center", marginBottom: "20px" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "6px" }}>🌐</div>
-                <h3 style={{ fontWeight: 800, color: "#6d28d9", fontSize: "1.1rem" }}>
+                <h3 style={{ fontWeight: 800, color: "#1e4876", fontSize: "1.1rem" }}>
                   {language === "ar" ? "اختر اللغة" : language === "fr" ? "Choisir la langue" : "Choose Language"}
                 </h3>
               </div>
@@ -240,20 +239,20 @@ export default function LoginClient({ lang }: Props) {
                     style={{
                       display: "flex", alignItems: "center", gap: "14px",
                       padding: "14px 16px",
-                      border: `2px solid ${currentLang === l.code ? "#7c3aed" : "#e2e8f0"}`,
+                      border: `2px solid ${currentLang === l.code ? "#1e4876" : "#e2e8f0"}`,
                       borderRadius: "12px",
-                      background: currentLang === l.code ? "#f5f3ff" : "white",
+                      background: currentLang === l.code ? "#e8f0f8" : "white",
                       cursor: "pointer", transition: "all 0.2s",
                       width: "100%", textAlign: "start",
                     }}
                   >
                     <span style={{ fontSize: "1.8rem" }}>{l.flag}</span>
                     <div>
-                      <div style={{ fontWeight: 700, color: "#3b0764", fontSize: "0.95rem" }}>{l.label}</div>
+                      <div style={{ fontWeight: 700, color: "#0d1f35", fontSize: "0.95rem" }}>{l.label}</div>
                       <div style={{ fontSize: "0.75rem", color: "#64748b" }}>{l.sub}</div>
                     </div>
                     {currentLang === l.code && (
-                      <span style={{ marginInlineStart: "auto", color: "#7c3aed", fontWeight: 700, fontSize: "1.1rem" }}>✓</span>
+                      <span style={{ marginInlineStart: "auto", color: "#1e4876", fontWeight: 700, fontSize: "1.1rem" }}>✓</span>
                     )}
                   </button>
                 ))}
@@ -277,15 +276,15 @@ export default function LoginClient({ lang }: Props) {
         <div
           className="login-card"
           style={{
-            background: "rgba(255,255,255,0.12)",
+            background: "rgba(11,24,42,0.55)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             borderRadius: "24px",
             padding: "44px 40px",
             width: "100%",
             maxWidth: "420px",
-            boxShadow: "0 30px 80px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.4)",
-            border: "1.5px solid rgba(255,255,255,0.25)",
+            boxShadow: "0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(138,168,200,0.2)",
+            border: "1.5px solid rgba(138,168,200,0.2)",
             position: "relative",
             zIndex: 1,
           }}
@@ -293,12 +292,12 @@ export default function LoginClient({ lang }: Props) {
           {/* Logo */}
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginBottom: "32px" }}>
             <div style={{
-              background: "rgba(255,255,255,0.2)",
+              background: "rgba(30,72,118,0.4)",
               borderRadius: "20px",
               padding: "10px",
               marginBottom: "14px",
-              border: "2px solid rgba(255,255,255,0.35)",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.2)",
+              border: "2px solid rgba(138,168,200,0.35)",
+              boxShadow: "0 8px 24px rgba(0,0,0,0.4)",
             }}>
               <Image
                 src="https://assets.kiloapps.io/user_dd4037cd-bc12-4818-a841-664202163b63/7ba274dd-eee4-4356-81ed-3609f94a4da8/1b601af4-0e53-4e3a-a63c-8b45dae62cb2.png"
@@ -310,15 +309,15 @@ export default function LoginClient({ lang }: Props) {
             </div>
             <h1 style={{
               fontSize: "1.7rem", fontWeight: 900,
-              color: "white", marginBottom: "6px",
-              textShadow: "0 2px 10px rgba(0,0,0,0.2)",
+              color: "#e8f0f8", marginBottom: "6px",
+              textShadow: "0 2px 12px rgba(0,0,0,0.4)",
               letterSpacing: "-0.3px",
             }}>
               R-Manager Pro
             </h1>
             <p style={{
               fontSize: "0.85rem",
-              color: "rgba(255,255,255,0.75)",
+              color: "rgba(138,168,200,0.9)",
               fontWeight: 500,
             }}>
               {language === "ar" ? "نظام إدارة الأعمال" : language === "fr" ? "Système de gestion" : "Business Management System"}
@@ -353,9 +352,9 @@ export default function LoginClient({ lang }: Props) {
 
             {error && (
               <div style={{
-                background: "rgba(239,68,68,0.25)",
-                border: "1px solid rgba(239,68,68,0.5)",
-                color: "white",
+                background: "rgba(239,68,68,0.2)",
+                border: "1px solid rgba(239,68,68,0.45)",
+                color: "#fca5a5",
                 padding: "10px 14px",
                 borderRadius: "10px",
                 fontSize: "0.85rem",
@@ -376,7 +375,7 @@ export default function LoginClient({ lang }: Props) {
             marginTop: "28px",
             textAlign: "center",
             fontSize: "0.75rem",
-            color: "rgba(255,255,255,0.45)",
+            color: "rgba(138,168,200,0.45)",
             fontWeight: 500,
           }}>
             Dev By Adouani Abderraouf
