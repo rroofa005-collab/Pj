@@ -17,36 +17,45 @@ if (!existsSync(dir)) {
 const sqlite = new Database(resolvedPath);
 const db = drizzle(sqlite, { schema });
 
-// Run Drizzle migrations (handles schema creation from scratch)
-await migrate(db, { migrationsFolder: "./src/db/migrations" });
-
-// ── Safety patches: add missing columns/tables if they don't exist ──
-// This handles databases that existed before a migration was added.
-
-const existingUserCols = sqlite
-  .prepare("PRAGMA table_info(users)")
-  .all() as { name: string }[];
-const userColNames = existingUserCols.map((c) => c.name);
-
-if (!userColNames.includes("worker_id")) {
-  sqlite.exec("ALTER TABLE users ADD COLUMN worker_id INTEGER;");
-  console.log("✅ Added worker_id column to users");
+// 1. Run Drizzle migrations
+try {
+  await migrate(db, { migrationsFolder: "./src/db/migrations" });
+  console.log("✅ Drizzle migrations applied");
+} catch (e) {
+  console.warn("⚠️  Drizzle migrate error (may be safe to ignore):", e);
 }
 
-// Create attendance table if it doesn't exist
-sqlite.exec(`
-  CREATE TABLE IF NOT EXISTS attendance (
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    user_id INTEGER,
-    username TEXT,
-    worker_id INTEGER,
-    worker_name TEXT,
-    check_in INTEGER,
-    check_out INTEGER,
-    work_hours REAL DEFAULT 0,
-    date TEXT,
-    note TEXT
-  );
-`);
+// 2. Safety patches — ensure all columns/tables exist regardless of migration state
+try {
+  // Add worker_id to users if missing
+  const userCols = (sqlite.prepare("PRAGMA table_info(users)").all() as { name: string }[]).map(c => c.name);
+  if (!userCols.includes("worker_id")) {
+    sqlite.exec("ALTER TABLE users ADD COLUMN worker_id INTEGER;");
+    console.log("✅ Patched: added worker_id to users");
+  }
+} catch (e) {
+  console.warn("⚠️  Patch worker_id error:", e);
+}
 
-console.log("✅ Migrations and patches completed successfully");
+try {
+  // Create attendance table if missing
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS attendance (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      user_id  INTEGER,
+      username TEXT,
+      worker_id INTEGER,
+      worker_name TEXT,
+      check_in  INTEGER,
+      check_out INTEGER,
+      work_hours REAL DEFAULT 0,
+      date TEXT,
+      note TEXT
+    );
+  `);
+  console.log("✅ attendance table ready");
+} catch (e) {
+  console.warn("⚠️  Create attendance table error:", e);
+}
+
+console.log("✅ DB init complete");

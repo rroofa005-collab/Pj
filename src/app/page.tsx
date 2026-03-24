@@ -6,11 +6,27 @@ import LoginClient from "./LoginClient";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  await ensureAdminExists();
-  const session = await getSession();
+  // Wrap in try/catch so DB errors don't crash the login page
+  try {
+    await ensureAdminExists();
+  } catch {
+    // DB not ready yet — login page still renders, user can retry
+  }
+
+  let session = null;
+  try {
+    session = await getSession();
+  } catch {
+    // ignore
+  }
   if (session) redirect("/dashboard");
 
-  const lang = await getLanguage();
+  let lang = "ar";
+  try {
+    lang = await getLanguage();
+  } catch {
+    // fallback to Arabic
+  }
 
   return <LoginClient lang={lang} />;
 }
