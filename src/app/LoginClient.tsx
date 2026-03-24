@@ -179,12 +179,8 @@ export default function LoginClient({ lang }: Props) {
         }
         .help-btn:hover { background: rgba(13,31,53,0.7); }
         @keyframes toastIn {
-          from { opacity: 0; transform: translateY(16px) scale(0.95); }
-          to   { opacity: 1; transform: translateY(0)   scale(1);    }
-        }
-        @keyframes toastOut {
-          from { opacity: 1; }
-          to   { opacity: 0; }
+          from { opacity: 0; transform: translate(-50%, calc(-50% + 20px)) scale(0.93); }
+          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
         }
         .toast {
           position: fixed;
@@ -200,7 +196,7 @@ export default function LoginClient({ lang }: Props) {
           font-weight: 800;
           border: 1px solid rgba(138,168,200,0.3);
           box-shadow: 0 20px 60px rgba(0,0,0,0.6);
-          animation: toastIn 0.3s ease forwards;
+          animation: toastIn 0.35s ease forwards;
           white-space: nowrap;
           letter-spacing: 1px;
           text-align: center;
