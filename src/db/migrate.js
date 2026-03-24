@@ -25,6 +25,7 @@ try {
     permissions TEXT NOT NULL DEFAULT '[]',
     is_active INTEGER NOT NULL DEFAULT 1,
     worker_id INTEGER,
+    access_settings TEXT,
     created_at INTEGER
   )`);
 

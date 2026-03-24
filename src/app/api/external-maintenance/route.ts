@@ -63,8 +63,9 @@ export async function PUT(req: NextRequest) {
     totalCost: totalCost,
     amountDue: amountDue,
     technicianName: body.technicianName,
-    phoneStatus: body.phoneStatus || "in_maintenance",
+    phoneStatus: body.phoneStatus || body.status || "in_maintenance",
     paymentStatus: body.paymentStatus || "unpaid",
+    statusNote: body.statusNote || null,
   }).where(eq(externalMaintenance.id, body.id)).returning();
   return NextResponse.json(result[0]);
 }

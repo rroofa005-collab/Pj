@@ -26,6 +26,33 @@ export async function loginAction(formData: FormData) {
     return { error: "invalidCredentials" };
   }
 
+  // Check access control for non-admin users
+  if (user[0].role !== "admin" && user[0].accessSettings) {
+    try {
+      const accessSettings = JSON.parse(user[0].accessSettings as string);
+      const now = new Date();
+      const currentDay = String(now.getDay());
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+      
+      if (accessSettings.days && accessSettings.days.length > 0) {
+        if (!accessSettings.days.includes(currentDay)) {
+          return { error: "accessDeniedDay" };
+        }
+      }
+      
+      if (accessSettings.timeStart && accessSettings.timeEnd) {
+        const [startH, startM] = accessSettings.timeStart.split(":").map(Number);
+        const [endH, endM] = accessSettings.timeEnd.split(":").map(Number);
+        const startMinutes = startH * 60 + startM;
+        const endMinutes = endH * 60 + endM;
+        
+        if (currentTime < startMinutes || currentTime > endMinutes) {
+          return { error: "accessDenied" };
+        }
+      }
+    } catch {}
+  }
+
   const token = createSessionToken(user[0].id);
   const cookieStore = await cookies();
   cookieStore.set("session", token, {

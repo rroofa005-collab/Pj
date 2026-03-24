@@ -9,6 +9,7 @@ export const users = sqliteTable("users", {
   permissions: text("permissions").notNull().default("[]"), // JSON array of page keys
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
   workerId: integer("worker_id"),   // linked worker/employee
+  accessSettings: text("access_settings"), // JSON for day/time access control
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
@@ -212,7 +213,8 @@ export const externalMaintenance = sqliteTable("external_maintenance", {
   totalCost: real("total_cost").notNull().default(0),
   amountDue: real("amount_due").notNull().default(0),
   technicianName: text("technician_name"),
-  phoneStatus: text("phone_status").notNull().default("in_maintenance"), // 'in_maintenance' | 'ready' | 'returned'
-  paymentStatus: text("payment_status").notNull().default("unpaid"), // 'paid' | 'unpaid'
+  phoneStatus: text("phone_status").notNull().default("in_maintenance"),
+  paymentStatus: text("payment_status").notNull().default("unpaid"),
+  statusNote: text("status_note"),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });

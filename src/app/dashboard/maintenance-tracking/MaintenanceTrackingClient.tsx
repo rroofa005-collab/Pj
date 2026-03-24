@@ -10,6 +10,8 @@ interface MaintenanceRecord {
   status: string;
   statusNote: string;
   createdAt: string;
+  type: "internal" | "external";
+  phoneStatus?: string;
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -33,28 +35,47 @@ export default function MaintenanceTrackingClient({ lang, role }: { lang: string
     if (search) params.set("search", search);
     if (fromDate) params.set("from", fromDate);
     if (toDate) params.set("to", toDate);
-    fetch(`/api/maintenance?${params}`)
-      .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setRows(data); })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    
+    Promise.all([
+      fetch(`/api/maintenance?${params}`).then(r => r.json()),
+      fetch(`/api/external-maintenance?${params}`).then(r => r.json())
+    ]).then(([internal, external]) => {
+      const combined: MaintenanceRecord[] = [
+        ...(Array.isArray(internal) ? internal : []).map((r: any) => ({ ...r, type: "internal" as const })),
+        ...(Array.isArray(external) ? external : []).map((r: any) => ({ ...r, type: "external" as const }))
+      ];
+      setRows(combined);
+    }).catch(() => {})
+    .finally(() => setLoading(false));
   }, [search, fromDate, toDate]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
-  }, [fetchData]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+  }, [search, fromDate, toDate]);
 
   async function updateStatus(row: MaintenanceRecord, newStatus: string, note: string) {
     const today = new Date().toLocaleDateString("ar-DZ");
-    await fetch("/api/maintenance", {
+    const apiEndpoint = row.type === "external" ? "/api/external-maintenance" : "/api/maintenance";
+    const updateData = row.type === "external" 
+      ? { 
+          id: row.id, 
+          name: row.name,
+          phoneType: row.phoneType,
+          dueAmount: row.dueAmount,
+          phoneStatus: newStatus, 
+          statusNote: `${note} - ${today}` 
+        }
+      : { 
+          ...row, 
+          status: newStatus, 
+          statusNote: `${note} - ${today}` 
+        };
+    
+    await fetch(apiEndpoint, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        ...row, 
-        status: newStatus, 
-        statusNote: `${note} - ${today}` 
-      }),
+      body: JSON.stringify(updateData),
     });
     fetchData();
   }
@@ -104,14 +125,30 @@ export default function MaintenanceTrackingClient({ lang, role }: { lang: string
               </thead>
               <tbody>
                 {rows.map((row, idx) => (
-                  <tr key={row.id}>
+                  <tr key={`${row.type}-${row.id}`}>
                     <td style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{idx + 1}</td>
-                    <td style={{ fontWeight: 600 }}>{row.name}</td>
+                    <td style={{ fontWeight: 600 }}>
+                      {row.name}
+                      {row.type === "external" && (
+                        <span style={{
+                          display: "inline-block",
+                          marginInlineStart: "6px",
+                          background: "#8b5cf6",
+                          color: "white",
+                          fontSize: "0.65rem",
+                          padding: "2px 6px",
+                          borderRadius: "8px",
+                          fontWeight: 600,
+                        }}>
+                        🏪 {language === "ar" ? "خارجي" : language === "fr" ? "Externe" : "Ext"}
+                      </span>
+                      )}
+                    </td>
                     <td>{row.phoneType}</td>
                     <td style={{ fontWeight: 600, color: "var(--primary)" }}>{Number(row.dueAmount).toLocaleString()} DA</td>
                     <td>
-                      <span className={`badge ${STATUS_BADGE[row.status] || "badge-secondary"}`}>
-                        {t(language, row.status === "in_maintenance" ? "inMaintenance" : row.status)}
+                      <span className={`badge ${STATUS_BADGE[row.type === "external" ? (row.phoneStatus || row.status) : row.status] || "badge-secondary"}`}>
+                        {t(language, ((row.type === "external" ? (row.phoneStatus || "") : row.status) || "") === "in_maintenance" ? "inMaintenance" : (row.type === "external" ? (row.phoneStatus || "") : row.status))}
                       </span>
                     </td>
                     <td style={{ maxWidth: "150px", fontSize: "0.8rem" }}>
@@ -122,14 +159,14 @@ export default function MaintenanceTrackingClient({ lang, role }: { lang: string
                         <button
                           className="btn btn-success btn-sm"
                           style={{ fontSize: "0.7rem", padding: "3px 6px" }}
-                          onClick={() => updateStatus(row, "ready", "تم الدفع والاستلام")}
+                          onClick={() => updateStatus(row, row.type === "external" ? "ready" : "ready", "تم التسليم والدفع")}
                         >
-                          ✅ {language === "ar" ? "تم الدفع" : "Payé"}
+                          ✅ {language === "ar" ? "تسليم" : "Livré"}
                         </button>
                         <button
                           className="btn btn-warning btn-sm"
                           style={{ fontSize: "0.7rem", padding: "3px 6px" }}
-                          onClick={() => updateStatus(row, "returned", "تم الإرجاع")}
+                          onClick={() => updateStatus(row, row.type === "external" ? "returned" : "returned", "تم الإرجاع")}
                         >
                           ↩️ {language === "ar" ? "إرجاع" : "Retour"}
                         </button>

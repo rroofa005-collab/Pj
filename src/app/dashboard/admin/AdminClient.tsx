@@ -10,6 +10,7 @@ interface User {
   permissions: string;
   isActive: boolean;
   workerId?: number | null;
+  accessSettings?: string | null;
 }
 
 interface Worker {
@@ -24,7 +25,7 @@ export default function AdminClient({ lang }: { lang: string }) {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [form, setForm] = useState({ username: "", password: "", role: "user", permissions: [] as string[], isActive: true, workerId: "" });
+  const [form, setForm] = useState({ username: "", password: "", role: "user", permissions: [] as string[], isActive: true, workerId: "", accessDays: [] as string[], accessTimeStart: "00:00", accessTimeEnd: "23:59" });
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
@@ -48,7 +49,7 @@ export default function AdminClient({ lang }: { lang: string }) {
 
   function openAdd() {
     setEditUser(null);
-    setForm({ username: "", password: "", role: "user", permissions: [], isActive: true, workerId: "" });
+    setForm({ username: "", password: "", role: "user", permissions: [], isActive: true, workerId: "", accessDays: [], accessTimeStart: "00:00", accessTimeEnd: "23:59" });
     setShowModal(true);
   }
 
@@ -56,7 +57,23 @@ export default function AdminClient({ lang }: { lang: string }) {
     setEditUser(user);
     let perms: string[] = [];
     try { perms = JSON.parse(user.permissions); } catch { perms = []; }
-    setForm({ username: user.username, password: "", role: user.role, permissions: perms, isActive: user.isActive, workerId: user.workerId ? String(user.workerId) : "" });
+    
+    let accessSettings = { days: [] as string[], timeStart: "00:00", timeEnd: "23:59" };
+    if (user.accessSettings) {
+      try { accessSettings = JSON.parse(user.accessSettings); } catch {}
+    }
+    
+    setForm({ 
+      username: user.username, 
+      password: "", 
+      role: user.role, 
+      permissions: perms, 
+      isActive: user.isActive, 
+      workerId: user.workerId ? String(user.workerId) : "",
+      accessDays: accessSettings.days || [],
+      accessTimeStart: accessSettings.timeStart || "00:00",
+      accessTimeEnd: accessSettings.timeEnd || "23:59"
+    });
     setShowModal(true);
   }
 
@@ -71,7 +88,15 @@ export default function AdminClient({ lang }: { lang: string }) {
 
   async function handleSave() {
     setSaving(true);
-    const body = { ...form, ...(editUser ? { id: editUser.id } : {}) };
+    const body = { 
+      ...form, 
+      ...(editUser ? { id: editUser.id } : {}),
+      accessSettings: JSON.stringify({ 
+        days: form.accessDays, 
+        timeStart: form.accessTimeStart, 
+        timeEnd: form.accessTimeEnd 
+      })
+    };
     await fetch("/api/users", {
       method: editUser ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
@@ -207,7 +232,64 @@ export default function AdminClient({ lang }: { lang: string }) {
                    ))}
                  </select>
                </div>
-             </div>
+              </div>
+
+            {/* Access Control Settings */}
+            {form.role === "user" && (
+              <div style={{ marginBottom: "16px", padding: "12px", background: "#f8fafc", borderRadius: "8px" }}>
+                <label className="form-label" style={{ marginBottom: "10px", display: "block" }}>
+                  🔐 {language === "ar" ? "التحكم في الوصول" : language === "fr" ? "Contrôle d'accès" : "Access Control"}
+                </label>
+                <div style={{ marginBottom: "10px" }}>
+                  <label style={{ fontSize: "0.8rem", fontWeight: 600, marginBottom: "6px", display: "block" }}>
+                    {language === "ar" ? "الأيام المسموح بها" : language === "fr" ? "Jours autorisés" : "Allowed Days"}
+                  </label>
+                  <div style={{ display: "flex", gap: "4px", flexWrap: "wrap" }}>
+                    {[
+                      { value: "0", label: language === "ar" ? "أ" : language === "fr" ? "D" : "S" },
+                      { value: "1", label: language === "ar" ? "ا" : language === "fr" ? "L" : "M" },
+                      { value: "2", label: language === "ar" ? "ث" : language === "fr" ? "Ma" : "T" },
+                      { value: "3", label: language === "ar" ? "أ" : language === "fr" ? "Me" : "W" },
+                      { value: "4", label: language === "ar" ? "خ" : language === "fr" ? "J" : "T" },
+                      { value: "5", label: language === "ar" ? "ج" : language === "fr" ? "V" : "F" },
+                      { value: "6", label: language === "ar" ? "س" : language === "fr" ? "Sa" : "S" },
+                    ].map(day => (
+                      <button
+                        key={day.value}
+                        type="button"
+                        onClick={() => setForm(prev => ({
+                          ...prev,
+                          accessDays: prev.accessDays.includes(day.value)
+                            ? prev.accessDays.filter(d => d !== day.value)
+                            : [...prev.accessDays, day.value]
+                        }))}
+                        style={{
+                          padding: "4px 8px",
+                          borderRadius: "4px",
+                          border: `1px solid ${form.accessDays.includes(day.value) ? "var(--accent)" : "var(--border)"}`,
+                          background: form.accessDays.includes(day.value) ? "#eff6ff" : "white",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                        }}
+                      >
+                        {day.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                  <div>
+                    <label style={{ fontSize: "0.75rem", fontWeight: 600 }}>{language === "ar" ? "من" : language === "fr" ? "De" : "From"}</label>
+                    <input className="form-control" type="time" value={form.accessTimeStart} onChange={e => setForm(prev => ({ ...prev, accessTimeStart: e.target.value }))} style={{ fontSize: "0.8rem" }} />
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.75rem", fontWeight: 600 }}>{language === "ar" ? "إلى" : language === "fr" ? "À" : "To"}</label>
+                    <input className="form-control" type="time" value={form.accessTimeEnd} onChange={e => setForm(prev => ({ ...prev, accessTimeEnd: e.target.value }))} style={{ fontSize: "0.8rem" }} />
+                  </div>
+                </div>
+              </div>
+            )}
 
             {form.role === "user" && (
               <div style={{ marginBottom: "16px" }}>
