@@ -1,16 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { db } from "@/db";
-import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
 import { hashPassword, createSessionToken } from "@/lib/server-auth";
 
-function ensureAdminExists() {
-  try {
-    const existing = db.select().from(users).where(eq(users.username, "Roofa")).limit(1);
-    // Note: In Drizzle, we need to check differently - this is just a placeholder
-    // The actual creation happens in migrate.js
-  } catch {}
+function hashPasswordSimple(password: string): string {
+  let hash = 0;
+  for (let i = 0; i < password.length; i++) {
+    const char = password.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36) + password.length.toString(36);
 }
 
 export async function POST(req: NextRequest) {
@@ -22,25 +21,76 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalidCredentials" }, { status: 400 });
   }
 
-  const hashed = hashPassword(password);
+  // Direct SQLite check - bypass Drizzle for reliability
+  let user: any = null;
   
-  let user;
   try {
-    user = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    // Try to load better-sqlite3 directly
+    const Database = require("better-sqlite3");
+    const dbPath = process.env.DB_PATH || "./data/database.db";
+    const sqlite = new Database(dbPath, { readonly: true });
+    
+    user = sqlite.prepare("SELECT * FROM users WHERE username = ?").get(username);
+    sqlite.close();
   } catch (e) {
-    // Database not ready - try to create tables
-    console.error("DB error:", e);
-    return NextResponse.json({ error: "dbNotReady" }, { status: 500 });
+    // Database might not exist yet or not initialized
+    console.error("DB read error:", e);
+    
+    // Try to initialize the database
+    try {
+      const Database = require("better-sqlite3");
+      const dbPath = process.env.DB_PATH || "./data/database.db";
+      const path = require("path");
+      const fs = require("fs");
+      
+      const dir = path.dirname(dbPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      
+      const sqlite = new Database(dbPath);
+      
+      // Create tables
+      sqlite.exec(`CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        password TEXT,
+        role TEXT DEFAULT 'user',
+        permissions TEXT DEFAULT '[]',
+        is_active INTEGER DEFAULT 1,
+        worker_id INTEGER,
+        access_settings TEXT,
+        created_at INTEGER
+      )`);
+      
+      // Create admin if not exists
+      const existing = sqlite.prepare("SELECT id FROM users WHERE username = 'Roofa'").get();
+      if (!existing) {
+        const hashed = hashPasswordSimple("Azer123");
+        sqlite.prepare("INSERT INTO users (username, password, role, permissions, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?)")
+          .run("Roofa", hashed, "admin", "[]", 1, Date.now());
+      }
+      
+      user = sqlite.prepare("SELECT * FROM users WHERE username = ?").get(username);
+      sqlite.close();
+    } catch (e2) {
+      console.error("DB init error:", e2);
+    }
   }
 
-  if (!user[0] || user[0].password !== hashed || !user[0].isActive) {
+  if (!user) {
+    return NextResponse.json({ error: "invalidCredentials" }, { status: 401 });
+  }
+
+  const hashed = hashPassword(password);
+  if (user.password !== hashed || !user.is_active) {
     return NextResponse.json({ error: "invalidCredentials" }, { status: 401 });
   }
 
   // Check access control for non-admin users
-  if (user[0].role !== "admin" && user[0].accessSettings) {
+  if (user.role !== "admin" && user.access_settings) {
     try {
-      const accessSettings = JSON.parse(user[0].accessSettings as string);
+      const accessSettings = JSON.parse(user.access_settings);
       const now = new Date();
       const currentDay = String(now.getDay());
       const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -64,7 +114,7 @@ export async function POST(req: NextRequest) {
     } catch {}
   }
 
-  const token = createSessionToken(user[0].id);
+  const token = createSessionToken(user.id);
   const cookieStore = await cookies();
   cookieStore.set("session", token, {
     httpOnly: true,
