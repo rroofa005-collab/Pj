@@ -16,7 +16,13 @@ export default function LoginClient({ lang }: Props) {
   const [loading, setLoading] = useState(false);
   const [currentLang, setCurrentLang] = useState(lang || "ar");
   const [showLangModal, setShowLangModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const router = useRouter();
+
+  function handleHelp() {
+    setShowToast(true);
+    setTimeout(() => setShowToast(false), 2500);
+  }
   const language = currentLang as Language;
   const dir = language === "ar" ? "rtl" : "ltr";
 
@@ -153,6 +159,51 @@ export default function LoginClient({ lang }: Props) {
           transition: all 0.2s;
         }
         .lang-btn:hover { background: rgba(13,31,53,0.7); }
+        .help-btn {
+          position: absolute;
+          top: 20px;
+          z-index: 10;
+          background: rgba(13,31,53,0.5);
+          border: 1px solid rgba(138,168,200,0.35);
+          color: #c5d4e3;
+          padding: 8px 14px;
+          border-radius: 20px;
+          cursor: pointer;
+          font-size: 0.82rem;
+          font-weight: 600;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          backdrop-filter: blur(8px);
+          transition: all 0.2s;
+        }
+        .help-btn:hover { background: rgba(13,31,53,0.7); }
+        @keyframes toastIn {
+          from { opacity: 0; transform: translateY(16px) scale(0.95); }
+          to   { opacity: 1; transform: translateY(0)   scale(1);    }
+        }
+        @keyframes toastOut {
+          from { opacity: 1; }
+          to   { opacity: 0; }
+        }
+        .toast {
+          position: fixed;
+          bottom: 36px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 999;
+          background: linear-gradient(135deg, #0d1f35, #1e4876);
+          color: #c5d4e3;
+          padding: 12px 28px;
+          border-radius: 30px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          border: 1px solid rgba(138,168,200,0.3);
+          box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+          animation: toastIn 0.3s ease forwards;
+          white-space: nowrap;
+          letter-spacing: 0.5px;
+        }
       `}</style>
 
       <div
@@ -195,6 +246,16 @@ export default function LoginClient({ lang }: Props) {
           pointerEvents: "none",
         }} />
 
+        {/* Help Button */}
+        <button
+          className="help-btn"
+          style={{ [dir === "rtl" ? "right" : "left"]: "20px" }}
+          onClick={handleHelp}
+        >
+          <span style={{ fontSize: "1rem" }}>❓</span>
+          {language === "ar" ? "مساعدة" : language === "fr" ? "Aide" : "Help"}
+        </button>
+
         {/* Language Button */}
         <button
           className="lang-btn"
@@ -205,6 +266,13 @@ export default function LoginClient({ lang }: Props) {
           {currentLangObj.label}
           <span style={{ fontSize: "0.65rem", opacity: 0.8 }}>▼</span>
         </button>
+
+        {/* Toast */}
+        {showToast && (
+          <div className="toast">
+            🚧 Coming Soon !!!
+          </div>
+        )}
 
         {/* Language Modal */}
         {showLangModal && (
