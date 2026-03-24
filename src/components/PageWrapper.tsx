@@ -25,6 +25,7 @@ interface PageWrapperProps {
   columns: Column[];
   fields: Field[];
   lang: string;
+  role?: string;
   summary?: React.ReactNode;
   extraTopContent?: React.ReactNode;
   defaultValues?: Record<string, unknown>;
@@ -33,9 +34,10 @@ interface PageWrapperProps {
 }
 
 export default function PageWrapper({
-  title, apiPath, columns, fields, lang, summary, extraTopContent, defaultValues = {}, onBeforeSave, renderCustomRow
+  title, apiPath, columns, fields, lang, role = "user", summary, extraTopContent, defaultValues = {}, onBeforeSave, renderCustomRow
 }: PageWrapperProps) {
   const language = (lang || "ar") as Language;
+  const isAdmin = role === "admin";
   const [rows, setRows] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -150,15 +152,16 @@ export default function PageWrapper({
       <div className="page-header">
         <h1 className="page-title">{title}</h1>
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-          <button className="btn btn-primary btn-sm" onClick={openAdd}>
-            + {t(language, "add")}
-          </button>
-          <button className="btn btn-warning btn-sm" onClick={clearData}>
-            🗑 {t(language, "clearData")}
-          </button>
-          <button className="btn btn-success btn-sm" onClick={exportData}>
-            📥 {t(language, "export")}
-          </button>
+          {isAdmin && (
+            <>
+              <button className="btn btn-warning btn-sm" onClick={clearData}>
+                🗑 {t(language, "clearData")}
+              </button>
+              <button className="btn btn-success btn-sm" onClick={exportData}>
+                📥 {t(language, "export")}
+              </button>
+            </>
+          )}
         </div>
       </div>
 

@@ -2,7 +2,7 @@
 import PageWrapper from "@/components/PageWrapper";
 import { t, type Language } from "@/lib/i18n";
 
-export default function DeliveryClient({ lang }: { lang: string }) {
+export default function DeliveryClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "amount", label: t(language, "amount"), type: "number" as const },
@@ -20,6 +20,7 @@ export default function DeliveryClient({ lang }: { lang: string }) {
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ amount: 0, note: "" }}
     />
   );

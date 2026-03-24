@@ -2,7 +2,7 @@
 import PageWrapper from "@/components/PageWrapper";
 import { t, type Language } from "@/lib/i18n";
 
-export default function ReceivedAmountsClient({ lang }: { lang: string }) {
+export default function ReceivedAmountsClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "nature", label: t(language, "nature") },
@@ -22,6 +22,7 @@ export default function ReceivedAmountsClient({ lang }: { lang: string }) {
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ nature: "", amount: 0, note: "" }}
     />
   );

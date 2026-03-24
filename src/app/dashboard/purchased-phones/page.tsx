@@ -1,6 +1,10 @@
 import { getLanguage } from "@/app/actions";
+import { getSession } from "@/lib/server-auth";
 import PurchasedPhonesClient from "./PurchasedPhonesClient";
+
 export default async function Page() {
   const lang = await getLanguage();
-  return <PurchasedPhonesClient lang={lang} />;
+  const session = await getSession();
+  const role = session?.role || "user";
+  return <PurchasedPhonesClient lang={lang} role={role} />;
 }

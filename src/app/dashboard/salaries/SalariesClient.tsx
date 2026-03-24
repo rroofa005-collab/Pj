@@ -4,7 +4,7 @@ import { t, type Language } from "@/lib/i18n";
 
 interface Worker { id: number; name: string; salary: number; }
 
-export default function SalariesClient({ lang, workers }: { lang: string; workers: Worker[] }) {
+export default function SalariesClient({ lang, role, workers }: { lang: string; role?: string; workers: Worker[] }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "workerName", label: t(language, "workerName") },
@@ -34,6 +34,7 @@ export default function SalariesClient({ lang, workers }: { lang: string; worker
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ workerId: "", workerName: "", baseSalary: 0, bonuses: 0, penalties: 0, netSalary: 0, paymentDate: "" }}
       onBeforeSave={(data) => ({
         ...data,

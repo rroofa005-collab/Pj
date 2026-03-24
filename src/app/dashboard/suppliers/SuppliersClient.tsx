@@ -2,7 +2,7 @@
 import PageWrapper from "@/components/PageWrapper";
 import { t, type Language } from "@/lib/i18n";
 
-export default function SuppliersClient({ lang }: { lang: string }) {
+export default function SuppliersClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "name", label: t(language, "name") },
@@ -23,7 +23,7 @@ export default function SuppliersClient({ lang }: { lang: string }) {
       apiPath="suppliers"
       columns={columns}
       fields={fields}
-      lang={lang}
+      lang={lang} role={role}
       defaultValues={{ name: "", serviceType: "", phone: "", note: "" }}
     />
   );

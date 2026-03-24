@@ -11,7 +11,7 @@ const WILAYAS = [
   "برج باجي مختار","أولاد جلال","بني عباس","عين صالح","عين قزام","تقرت","جانت","المغير","المنيعة"
 ];
 
-export default function OrdersClient({ lang }: { lang: string }) {
+export default function OrdersClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "name", label: t(language, "name") },
@@ -46,6 +46,7 @@ export default function OrdersClient({ lang }: { lang: string }) {
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ name: "", product: "", totalAmountNoDelivery: 0, wilaya: "", orderStatus: "pending" }}
     />
   );

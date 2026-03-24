@@ -2,7 +2,7 @@
 import PageWrapper from "@/components/PageWrapper";
 import { t, type Language } from "@/lib/i18n";
 
-export default function PurchasedPhonesClient({ lang }: { lang: string }) {
+export default function PurchasedPhonesClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "name", label: t(language, "name") },
@@ -30,6 +30,7 @@ export default function PurchasedPhonesClient({ lang }: { lang: string }) {
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ name: "", phone: "", phoneType: "", phoneDetails: "", serialNumber: "", phoneCondition: "", purchaseAmount: 0 }}
     />
   );

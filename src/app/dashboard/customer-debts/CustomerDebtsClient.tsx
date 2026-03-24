@@ -2,7 +2,7 @@
 import PageWrapper from "@/components/PageWrapper";
 import { t, type Language } from "@/lib/i18n";
 
-export default function CustomerDebtsClient({ lang }: { lang: string }) {
+export default function CustomerDebtsClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "name", label: t(language, "name") },
@@ -32,6 +32,7 @@ export default function CustomerDebtsClient({ lang }: { lang: string }) {
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ name: "", phone: "", serviceOrProduct: "", totalAmount: 0, paidAmount: 0, remainingAmount: 0, dueDate: "", note: "" }}
       onBeforeSave={(data) => ({
         ...data,

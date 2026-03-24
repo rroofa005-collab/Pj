@@ -2,7 +2,7 @@
 import PageWrapper from "@/components/PageWrapper";
 import { t, type Language } from "@/lib/i18n";
 
-export default function MaintenanceClient({ lang }: { lang: string }) {
+export default function MaintenanceClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "name", label: t(language, "name") },
@@ -46,6 +46,7 @@ export default function MaintenanceClient({ lang }: { lang: string }) {
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ name: "", phoneType: "", fault: "", partsCost: 0, laborCost: 0, totalCost: 0, dueAmount: 0, netProfit: 0, status: "in_maintenance", statusNote: "" }}
       onBeforeSave={(data) => {
         const parts = Number(data.partsCost) || 0;

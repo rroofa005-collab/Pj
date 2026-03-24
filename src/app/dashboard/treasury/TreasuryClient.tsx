@@ -2,7 +2,7 @@
 import PageWrapper from "@/components/PageWrapper";
 import { t, type Language } from "@/lib/i18n";
 
-export default function TreasuryClient({ lang }: { lang: string }) {
+export default function TreasuryClient({ lang, role }: { lang: string; role?: string }) {
   const language = (lang || "ar") as Language;
   const columns = [
     { key: "createdAt", label: t(language, "date"), type: "date" as const },
@@ -40,6 +40,7 @@ export default function TreasuryClient({ lang }: { lang: string }) {
       columns={columns}
       fields={fields}
       lang={lang}
+      role={role}
       defaultValues={{ openingBalance: 0, programBalance: 0, actualBalance: 0, expenses: 0, purchases: 0, customerDebts: 0, receivedAmounts: 0, wages: 0, installments: 0, flexi: 0, maintenance: 0, note: "" }}
     />
   );

@@ -1,9 +1,13 @@
 import { getLanguage } from "@/app/actions";
+import { getSession } from "@/lib/server-auth";
 import { db } from "@/db";
 import { workers } from "@/db/schema";
 import SalariesClient from "./SalariesClient";
+
 export default async function Page() {
   const lang = await getLanguage();
+  const session = await getSession();
+  const role = session?.role || "user";
   const workerList = await db.select({ id: workers.id, name: workers.name, salary: workers.salary }).from(workers);
-  return <SalariesClient lang={lang} workers={workerList} />;
+  return <SalariesClient lang={lang} role={role} workers={workerList} />;
 }
