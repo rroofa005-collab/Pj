@@ -14,8 +14,9 @@ export default function LoginClient({ lang }: Props) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [currentLang, setCurrentLang] = useState(lang || "ar");
   const router = useRouter();
-  const language = (lang || "ar") as Language;
+  const language = currentLang as Language;
   const dir = language === "ar" ? "rtl" : "ltr";
 
   async function handleSubmit(e: React.FormEvent) {
@@ -44,6 +45,15 @@ export default function LoginClient({ lang }: Props) {
     }
   }
 
+  async function changeLanguage(newLang: string) {
+    setCurrentLang(newLang);
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "language", value: newLang }),
+    });
+  }
+
   return (
     <div
       dir={dir}
@@ -59,6 +69,43 @@ export default function LoginClient({ lang }: Props) {
         overflow: "hidden",
       }}
     >
+      {/* Language Switcher */}
+      <div style={{
+        position: "absolute",
+        top: "16px",
+        right: dir === "rtl" ? "auto" : "16px",
+        left: dir === "rtl" ? "16px" : "auto",
+        zIndex: 10,
+        display: "flex",
+        gap: "8px",
+      }}>
+        {[
+          { code: "ar", flag: "🇩🇿", label: "عربي" },
+          { code: "fr", flag: "🇫🇷", label: "Français" },
+          { code: "en", flag: "🇬🇧", label: "English" },
+        ].map((lang) => (
+          <button
+            key={lang.code}
+            onClick={() => changeLanguage(lang.code)}
+            style={{
+              background: currentLang === lang.code ? "rgba(255,255,255,0.2)" : "transparent",
+              border: "1px solid rgba(255,255,255,0.3)",
+              color: "white",
+              padding: "6px 12px",
+              borderRadius: "20px",
+              cursor: "pointer",
+              fontSize: "0.8rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              transition: "all 0.2s",
+            }}
+          >
+            {lang.flag} {lang.label}
+          </button>
+        ))}
+      </div>
+
       {/* Background pattern */}
       <div style={{
         position: "absolute",
