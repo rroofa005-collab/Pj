@@ -17,5 +17,36 @@ if (!existsSync(dir)) {
 const sqlite = new Database(resolvedPath);
 const db = drizzle(sqlite, { schema });
 
+// Run Drizzle migrations (handles schema creation from scratch)
 await migrate(db, { migrationsFolder: "./src/db/migrations" });
-console.log("✅ Migrations completed successfully");
+
+// ── Safety patches: add missing columns/tables if they don't exist ──
+// This handles databases that existed before a migration was added.
+
+const existingUserCols = sqlite
+  .prepare("PRAGMA table_info(users)")
+  .all() as { name: string }[];
+const userColNames = existingUserCols.map((c) => c.name);
+
+if (!userColNames.includes("worker_id")) {
+  sqlite.exec("ALTER TABLE users ADD COLUMN worker_id INTEGER;");
+  console.log("✅ Added worker_id column to users");
+}
+
+// Create attendance table if it doesn't exist
+sqlite.exec(`
+  CREATE TABLE IF NOT EXISTS attendance (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    user_id INTEGER,
+    username TEXT,
+    worker_id INTEGER,
+    worker_name TEXT,
+    check_in INTEGER,
+    check_out INTEGER,
+    work_hours REAL DEFAULT 0,
+    date TEXT,
+    note TEXT
+  );
+`);
+
+console.log("✅ Migrations and patches completed successfully");
