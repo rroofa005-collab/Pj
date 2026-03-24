@@ -8,6 +8,7 @@ export const users = sqliteTable("users", {
   role: text("role").notNull().default("user"), // 'admin' | 'user'
   permissions: text("permissions").notNull().default("[]"), // JSON array of page keys
   isActive: integer("is_active", { mode: "boolean" }).notNull().default(true),
+  workerId: integer("worker_id"),   // linked worker/employee
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
 });
 
@@ -176,6 +177,20 @@ export const deliveryTracking = sqliteTable("delivery_tracking", {
   amount: real("amount").notNull().default(0),
   note: text("note"),
   createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+});
+
+// Attendance (الحضور)
+export const attendance = sqliteTable("attendance", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id"),
+  username: text("username"),
+  workerId: integer("worker_id"),
+  workerName: text("worker_name"),
+  checkIn: integer("check_in", { mode: "timestamp" }),
+  checkOut: integer("check_out", { mode: "timestamp" }),
+  workHours: real("work_hours").default(0),
+  date: text("date"), // "YYYY-MM-DD"
+  note: text("note"),
 });
 
 // App Settings

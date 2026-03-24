@@ -31,6 +31,7 @@ export const ALL_PAGES = [
   { key: "salaries", labelAr: "الرواتب", labelFr: "Salaires", labelEn: "Salaries" },
   { key: "treasury", labelAr: "الخزينة", labelFr: "Trésorerie", labelEn: "Treasury" },
   { key: "delivery", labelAr: "تتبع التوصيل", labelFr: "Suivi livraison", labelEn: "Delivery Tracking" },
+  { key: "attendance", labelAr: "الحضور والمغادرة", labelFr: "Présences", labelEn: "Attendance" },
   { key: "settings", labelAr: "الإعدادات", labelFr: "Paramètres", labelEn: "Settings" },
   { key: "admin", labelAr: "إدارة المستخدمين", labelFr: "Gestion utilisateurs", labelEn: "User Management" },
 ];

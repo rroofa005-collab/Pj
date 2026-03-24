@@ -29,6 +29,7 @@ const ALL_NAV: NavItem[] = [
   { key: "salaries", icon: "🏦", href: "/dashboard/salaries" },
   { key: "treasury", icon: "🏛️", href: "/dashboard/treasury" },
   { key: "delivery", icon: "🚚", href: "/dashboard/delivery" },
+  { key: "attendance", icon: "📅", href: "/dashboard/attendance" },
   { key: "settings", icon: "⚙️", href: "/dashboard/settings" },
   { key: "admin", icon: "👥", href: "/dashboard/admin" },
 ];

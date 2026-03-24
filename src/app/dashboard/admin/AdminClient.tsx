@@ -9,15 +9,22 @@ interface User {
   role: string;
   permissions: string;
   isActive: boolean;
+  workerId?: number | null;
+}
+
+interface Worker {
+  id: number;
+  name: string;
 }
 
 export default function AdminClient({ lang }: { lang: string }) {
   const language = (lang || "ar") as Language;
   const [users, setUsers] = useState<User[]>([]);
+  const [workers, setWorkers] = useState<Worker[]>([]);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editUser, setEditUser] = useState<User | null>(null);
-  const [form, setForm] = useState({ username: "", password: "", role: "user", permissions: [] as string[], isActive: true });
+  const [form, setForm] = useState({ username: "", password: "", role: "user", permissions: [] as string[], isActive: true, workerId: "" });
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
@@ -33,11 +40,15 @@ export default function AdminClient({ lang }: { lang: string }) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchUsers();
+    fetch("/api/workers")
+      .then(r => r.json())
+      .then(data => { if (Array.isArray(data)) setWorkers(data); })
+      .catch(() => {});
   }, [fetchUsers]);
 
   function openAdd() {
     setEditUser(null);
-    setForm({ username: "", password: "", role: "user", permissions: [], isActive: true });
+    setForm({ username: "", password: "", role: "user", permissions: [], isActive: true, workerId: "" });
     setShowModal(true);
   }
 
@@ -45,7 +56,7 @@ export default function AdminClient({ lang }: { lang: string }) {
     setEditUser(user);
     let perms: string[] = [];
     try { perms = JSON.parse(user.permissions); } catch { perms = []; }
-    setForm({ username: user.username, password: "", role: user.role, permissions: perms, isActive: user.isActive });
+    setForm({ username: user.username, password: "", role: user.role, permissions: perms, isActive: user.isActive, workerId: user.workerId ? String(user.workerId) : "" });
     setShowModal(true);
   }
 
@@ -98,14 +109,15 @@ export default function AdminClient({ lang }: { lang: string }) {
           ) : (
             <table className="data-table">
               <thead>
-                <tr>
-                  <th>#</th>
-                  <th>{t(language, "username")}</th>
-                  <th>{t(language, "role")}</th>
-                  <th>{t(language, "permissions")}</th>
-                  <th>{t(language, "isActive")}</th>
-                  <th>{t(language, "actions")}</th>
-                </tr>
+                 <tr>
+                   <th>#</th>
+                   <th>{t(language, "username")}</th>
+                   <th>{t(language, "role")}</th>
+                   <th>{language === "ar" ? "الموظف المرتبط" : language === "fr" ? "Employé lié" : "Linked Employee"}</th>
+                   <th>{t(language, "permissions")}</th>
+                   <th>{t(language, "isActive")}</th>
+                   <th>{t(language, "actions")}</th>
+                 </tr>
               </thead>
               <tbody>
                 {users.map((user, idx) => {
@@ -115,12 +127,17 @@ export default function AdminClient({ lang }: { lang: string }) {
                     <tr key={user.id}>
                       <td style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{idx + 1}</td>
                       <td style={{ fontWeight: 600 }}>{user.username}</td>
-                      <td>
-                        <span className={`badge ${user.role === "admin" ? "badge-info" : "badge-secondary"}`}>
-                          {t(language, user.role === "admin" ? "roleAdmin" : "roleUser")}
-                        </span>
-                      </td>
-                      <td>
+                       <td>
+                         <span className={`badge ${user.role === "admin" ? "badge-info" : "badge-secondary"}`}>
+                           {t(language, user.role === "admin" ? "roleAdmin" : "roleUser")}
+                         </span>
+                       </td>
+                       <td>
+                         {user.workerId
+                           ? <span className="badge badge-success">{workers.find(w => w.id === user.workerId)?.name || "—"}</span>
+                           : <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>—</span>}
+                       </td>
+                       <td>
                         {user.role === "admin" ? (
                           <span className="badge badge-success">{language === "ar" ? "كل الصلاحيات" : language === "fr" ? "Toutes permissions" : "All permissions"}</span>
                         ) : (
@@ -175,13 +192,22 @@ export default function AdminClient({ lang }: { lang: string }) {
                 </select>
               </div>
               <div>
-                <label className="form-label">{t(language, "isActive")}</label>
-                <select className="form-control" value={form.isActive ? "true" : "false"} onChange={(e) => setForm({ ...form, isActive: e.target.value === "true" })}>
-                  <option value="true">{t(language, "active")}</option>
-                  <option value="false">{t(language, "inactive")}</option>
-                </select>
-              </div>
-            </div>
+                 <label className="form-label">{t(language, "isActive")}</label>
+                 <select className="form-control" value={form.isActive ? "true" : "false"} onChange={(e) => setForm({ ...form, isActive: e.target.value === "true" })}>
+                   <option value="true">{t(language, "active")}</option>
+                   <option value="false">{t(language, "inactive")}</option>
+                 </select>
+               </div>
+               <div style={{ gridColumn: "1 / -1" }}>
+                 <label className="form-label">👷 {language === "ar" ? "ربط بموظف (اختياري)" : language === "fr" ? "Lier à un employé (optionnel)" : "Link to Employee (optional)"}</label>
+                 <select className="form-control" value={form.workerId} onChange={e => setForm({ ...form, workerId: e.target.value })}>
+                   <option value="">{language === "ar" ? "— بدون ربط —" : language === "fr" ? "— Sans lien —" : "— No link —"}</option>
+                   {workers.filter(w => (w as unknown as Record<string, unknown>).isActive !== false).map(w => (
+                     <option key={w.id} value={w.id}>{w.name}</option>
+                   ))}
+                 </select>
+               </div>
+             </div>
 
             {form.role === "user" && (
               <div style={{ marginBottom: "16px" }}>
