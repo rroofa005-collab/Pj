@@ -47,6 +47,7 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
 
   useEffect(() => {
     if (!isAdmin) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoadingDev(true);
       fetch("/api/settings")
         .then(r => r.json())
