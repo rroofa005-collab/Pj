@@ -182,6 +182,11 @@ export default function AppLayout({ children, lang, role, permissions, username 
           padding: "16px", 
           background: "var(--bg)",
           marginInlineStart: 0,
+          height: "100dvh",
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          boxSizing: "border-box",
         }}
       >
         {/* Mobile menu button */}
