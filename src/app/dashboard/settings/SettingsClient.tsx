@@ -30,6 +30,9 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
   const [devInfo, setDevInfo] = useState<DeveloperInfo>(defaultDevInfo);
   const [loadingDev, setLoadingDev] = useState(false);
   const [editingDev, setEditingDev] = useState(false);
+  const [feedbackText, setFeedbackText] = useState("");
+  const [sendingFeedback, setSendingFeedback] = useState(false);
+  const [feedbackSent, setFeedbackSent] = useState(false);
   const typedLang = language as Language;
   const isAdmin = role === "admin";
 
@@ -75,6 +78,29 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
     setEditingDev(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  }
+
+  async function sendFeedback() {
+    if (!feedbackText.trim()) return;
+    setSendingFeedback(true);
+    // Save feedback to settings (admin can view it)
+    const currentFeedback = await fetch("/api/settings").then(r => r.json()).then(d => d.feedback || "[]");
+    let feedbackArray = [];
+    try { feedbackArray = JSON.parse(currentFeedback); } catch { feedbackArray = []; }
+    feedbackArray.push({
+      text: feedbackText,
+      date: new Date().toISOString(),
+      userRole: role,
+    });
+    await fetch("/api/settings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key: "feedback", value: JSON.stringify(feedbackArray) }),
+    });
+    setSendingFeedback(false);
+    setFeedbackSent(true);
+    setFeedbackText("");
+    setTimeout(() => setFeedbackSent(false), 3000);
   }
 
   return (
@@ -132,7 +158,7 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
           </button>
         </div>
 
-        {/* Developer Info - Only visible to non-admins */}
+          {/* Developer Info - Only visible to non-admins */}
         {!isAdmin && (
           <div className="card">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
@@ -176,6 +202,32 @@ export default function SettingsClient({ lang, role }: { lang: string; role: str
             )}
           </div>
         )}
+
+        {/* Feedback Section - Visible to all users */}
+        <div className="card">
+          <h2 style={{ fontWeight: 700, marginBottom: "14px", color: "var(--primary)", fontSize: "0.95rem" }}>
+            💬 {language === "ar" ? "إرسال ملاحظة" : language === "fr" ? "Envoyer une note" : "Send Feedback"}
+          </h2>
+          <p style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginBottom: "12px" }}>
+            {language === "ar" ? "قدم اقتراحاتك أو أبلغ عن مشاكل في التطبيق" : language === "fr" ? "Faites vos suggestions ou signalez des problèmes" : "Make suggestions or report issues"}
+          </p>
+          <textarea
+            className="form-control"
+            rows={4}
+            value={feedbackText}
+            onChange={(e) => setFeedbackText(e.target.value)}
+            placeholder={language === "ar" ? "اكتب ملاحظتك هنا..." : language === "fr" ? "Écrivez votre note ici..." : "Write your feedback here..."}
+            style={{ marginBottom: "10px" }}
+          />
+          <button
+            className="btn btn-primary"
+            onClick={sendFeedback}
+            disabled={sendingFeedback || !feedbackText.trim()}
+            style={{ width: "100%", justifyContent: "center" }}
+          >
+            {sendingFeedback ? "..." : feedbackSent ? "✅ " + (language === "ar" ? "تم الإرسال" : language === "fr" ? "Envoyé" : "Sent") : "🚀 " + (language === "ar" ? "إرسال" : language === "fr" ? "Envoyer" : "Send")}
+          </button>
+        </div>
 
         {/* Developer Settings - Only for Admin */}
         {isAdmin && (
