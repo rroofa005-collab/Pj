@@ -21,15 +21,19 @@ Full-featured business management application built with Next.js 16, SQLite (Dri
 - [x] Purchased Phones page (الهواتف المشتراة)
 - [x] Received Amounts page (المبالغ المستلمة)
 - [x] Maintenance page (الصيانة) - auto-calculates totalCost and netProfit
-- [x] Maintenance Tracking page (تتبع الصيانة) - inline status editing
+- [x] Maintenance Tracking page (تتبع الصيانة) - inline status editing + combines internal/external
+- [x] External Maintenance page (الصيانة الخارجية) - with technician, costs, phone status
 - [x] Electronic Services page (الخدمات الإلكترونية) - dollar balance tracking
 - [x] Order Tracking page (تتبع الطلبيات) - with wilaya dropdown (58 wilayas)
 - [x] Installments page (الأقساط) - linked to workers
 - [x] Salaries page (الرواتب) - auto-calculates net salary
 - [x] Treasury page (الخزينة)
 - [x] Delivery Tracking page (تتبع التوصيل)
+- [x] Attendance page (الحضور والمغادرة)
 - [x] Settings page - language switcher (Arabic/French/English)
 - [x] Admin page - full user management with page-level permissions
+- [x] Per-user access control (days and time restrictions) in Admin page
+- [x] Global access control settings in Settings page
 - [x] Search + date range filters on every page
 - [x] Export to CSV and Clear Data buttons on every page
 - [x] i18n support (Arabic, French, English) via `/src/lib/i18n.ts`
@@ -65,3 +69,7 @@ Full-featured business management application built with Next.js 16, SQLite (Dri
 | 2026-03-24 | Full R-Manager Pro application built from scratch |
 | 2026-03-24 | Fixed: Migrated from Bun to Node.js for better-sqlite3 compatibility; Created migrate.js with table creation + admin user setup |
 | 2026-03-24 | Fixed: Admin user credentials verified (Roofa/Azer123 hash: izamy47) |
+| 2026-03-24 | Added: External Maintenance page with technician, costs, phone status tracking |
+| 2026-03-24 | Added: Per-user access control (days + time) in Admin page |
+| 2026-03-24 | Added: Global access control settings in Settings page |
+| 2026-03-24 | Updated: Maintenance tracking now shows both internal and external maintenance with badges |
