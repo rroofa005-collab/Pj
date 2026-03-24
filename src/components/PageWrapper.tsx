@@ -152,6 +152,9 @@ export default function PageWrapper({
       <div className="page-header">
         <h1 className="page-title">{title}</h1>
         <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>
+            + {t(language, "add")}
+          </button>
           {isAdmin && (
             <>
               <button className="btn btn-warning btn-sm" onClick={clearData}>
