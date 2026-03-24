@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "./auth";
+import { getSession } from "./server-auth";
 import { db } from "@/db";
 import { eq, and, gte, lte, like, or } from "drizzle-orm";
 import { SQLiteTable } from "drizzle-orm/sqlite-core";

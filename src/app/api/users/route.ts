@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, eq } from "@/lib/apiHelper";
 import { users } from "@/db/schema";
-import { getSession } from "@/lib/auth";
-import { hashPassword } from "@/lib/auth";
+import { getSession } from "@/lib/server-auth";
+import { hashPassword } from "@/lib/server-auth";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();

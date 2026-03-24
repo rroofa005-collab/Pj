@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db, eq } from "@/lib/apiHelper";
 import { installments } from "@/db/schema";
-import { getSession } from "@/lib/auth";
+import { getSession } from "@/lib/server-auth";
 import { gte, lte, and, like } from "drizzle-orm";
 
 export async function GET(req: NextRequest) {

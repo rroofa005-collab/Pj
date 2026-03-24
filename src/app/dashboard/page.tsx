@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { getSession } from "@/lib/server-auth";
 import { getLanguage } from "../actions";
 import DashboardClient from "./DashboardClient";
 

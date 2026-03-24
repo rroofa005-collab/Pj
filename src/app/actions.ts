@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { users, appSettings } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { hashPassword, createSessionToken } from "@/lib/auth";
+import { hashPassword, createSessionToken } from "@/lib/server-auth";
 
 export async function loginAction(formData: FormData) {
   const username = formData.get("username") as string;

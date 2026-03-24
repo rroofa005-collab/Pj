@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/auth";
+import { getSession } from "@/lib/server-auth";
 import { redirect } from "next/navigation";
 import { getLanguage } from "../actions";
 import AppLayout from "@/components/AppLayout";

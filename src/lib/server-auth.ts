@@ -1,3 +1,41 @@
+import { cookies } from "next/headers";
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
+
+export interface SessionUser {
+  id: number;
+  username: string;
+  role: string;
+  permissions: string[];
+}
+
+export async function getSession(): Promise<SessionUser | null> {
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get("session");
+  if (!sessionCookie) return null;
+
+  try {
+    const sessionData = JSON.parse(
+      Buffer.from(sessionCookie.value, "base64").toString("utf-8")
+    );
+    const user = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, sessionData.id))
+      .limit(1);
+    if (!user[0] || !user[0].isActive) return null;
+    return {
+      id: user[0].id,
+      username: user[0].username,
+      role: user[0].role,
+      permissions: JSON.parse(user[0].permissions || "[]"),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export function hashPassword(password: string): string {
   let hash = 0;
   for (let i = 0; i < password.length; i++) {

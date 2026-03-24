@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { hashPassword, createSessionToken } from "@/lib/auth";
+import { hashPassword, createSessionToken } from "@/lib/server-auth";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
