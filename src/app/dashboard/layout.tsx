@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getLanguage } from "../actions";
 import AppLayout from "@/components/AppLayout";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {
