@@ -55,7 +55,9 @@ export default function AppLayout({ children, lang, role, permissions, username 
     if (item.key === "dashboard") return true;
     if (isAdmin) return true;
     const pageKey = item.href.replace("/dashboard/", "") || "dashboard";
-    return permissions.includes(pageKey) || permissions.includes(item.key);
+    // Handle both formats: "external-maintenance" vs "externalMaintenance"
+    const normalizedKey = pageKey.replace(/-/g, "");
+    return permissions.includes(pageKey) || permissions.includes(normalizedKey) || permissions.includes(item.key);
   });
 
   async function handleLogout() {
