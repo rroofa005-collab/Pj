@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     permissions: users.permissions,
     isActive: users.isActive,
     workerId: users.workerId,
+    accessSettings: users.accessSettings,
     createdAt: users.createdAt,
   }).from(users);
   return NextResponse.json(rows);
@@ -30,7 +31,8 @@ export async function POST(req: NextRequest) {
     permissions: JSON.stringify(body.permissions || []),
     isActive: body.isActive !== false,
     workerId: body.workerId ? Number(body.workerId) : null,
-  }).returning({ id: users.id, username: users.username, role: users.role, permissions: users.permissions, isActive: users.isActive, workerId: users.workerId });
+    accessSettings: body.accessSettings || null,
+  }).returning({ id: users.id, username: users.username, role: users.role, permissions: users.permissions, isActive: users.isActive, workerId: users.workerId, accessSettings: users.accessSettings });
   return NextResponse.json(result[0]);
 }
 
@@ -48,8 +50,11 @@ export async function PUT(req: NextRequest) {
   if (body.password) {
     updateData.password = hashPassword(body.password);
   }
+  if (body.accessSettings !== undefined) {
+    updateData.accessSettings = body.accessSettings;
+  }
   const result = await db.update(users).set(updateData).where(eq(users.id, body.id))
-    .returning({ id: users.id, username: users.username, role: users.role, permissions: users.permissions, isActive: users.isActive, workerId: users.workerId });
+    .returning({ id: users.id, username: users.username, role: users.role, permissions: users.permissions, isActive: users.isActive, workerId: users.workerId, accessSettings: users.accessSettings });
   return NextResponse.json(result[0]);
 }
 

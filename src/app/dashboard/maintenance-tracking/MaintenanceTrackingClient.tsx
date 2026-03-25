@@ -37,15 +37,20 @@ export default function MaintenanceTrackingClient({ lang, role }: { lang: string
     if (toDate) params.set("to", toDate);
     
     Promise.all([
-      fetch(`/api/maintenance?${params}`).then(r => r.json()),
-      fetch(`/api/external-maintenance?${params}`).then(r => r.json())
+      fetch(`/api/maintenance?${params}`).then(r => r.json()).catch(() => []),
+      fetch(`/api/external-maintenance?${params}`).then(r => r.json()).catch(() => [])
     ]).then(([internal, external]) => {
+      const internalArr = Array.isArray(internal) ? internal : [];
+      const externalArr = Array.isArray(external) ? external : [];
+      
       const combined: MaintenanceRecord[] = [
-        ...(Array.isArray(internal) ? internal : []).map((r: any) => ({ ...r, type: "internal" as const })),
-        ...(Array.isArray(external) ? external : []).map((r: any) => ({ ...r, type: "external" as const }))
+        ...internalArr.map((r: any) => ({ ...r, type: "internal" as const })),
+        ...externalArr.map((r: any) => ({ ...r, type: "external" as const }))
       ];
       setRows(combined);
-    }).catch(() => {})
+    }).catch(() => {
+      setRows([]);
+    })
     .finally(() => setLoading(false));
   }, [search, fromDate, toDate]);
 
