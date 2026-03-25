@@ -1,31 +1,32 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
 import * as schema from "./schema";
-import path from "path";
-import { mkdirSync, existsSync } from "fs";
 
-// Lazy singleton — only connect when first query is made
-let _db: BetterSQLite3Database<typeof schema> | null = null;
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
 
-function getDb(): BetterSQLite3Database<typeof schema> {
-  if (_db) return _db;
+let _db: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let _client: postgres.Sql<{}> | null = null;
 
-  const dbPath = process.env.DB_PATH || "./data/database.db";
-  const resolvedPath = path.resolve(dbPath);
-
-  const dir = path.dirname(resolvedPath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
+function getClient(): postgres.Sql<{}> {
+  if (_client) return _client;
+  
+  if (!connectionString) {
+    throw new Error("DATABASE_URL or POSTGRES_URL environment variable is not set");
   }
+  
+  _client = postgres(connectionString, { max: 1 });
+  return _client;
+}
 
-  const sqlite = new Database(resolvedPath);
-  _db = drizzle(sqlite, { schema });
+function getDb() {
+  if (_db) return _db;
+  
+  const client = getClient();
+  _db = drizzle(client, { schema });
   return _db;
 }
 
-// Proxy so callers use `db` as normal but connection is lazy
-export const db = new Proxy({} as BetterSQLite3Database<typeof schema>, {
+export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
   get(_, prop: string | symbol) {
     return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
   },

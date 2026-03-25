@@ -1,39 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { hashPassword, createSessionToken } from "@/lib/server-auth";
-import path from "path";
-import fs from "fs";
-
-function hashPasswordSimple(password: string): string {
-  let hash = 0;
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(36) + password.length.toString(36);
-}
-
-function getDbPath(): string {
-  // Try multiple paths for Railway compatibility
-  const paths = [
-    process.env.DB_PATH,
-    path.join(process.cwd(), "data", "database.db"),
-    "/tmp/data/database.db",
-    path.join(process.cwd(), "database.db"),
-  ];
-  
-  for (const p of paths) {
-    if (p) {
-      const dir = path.dirname(p);
-      if (!fs.existsSync(dir)) {
-        try { fs.mkdirSync(dir, { recursive: true }); } catch {}
-      }
-      return p;
-    }
-  }
-  return path.join(process.cwd(), "data", "database.db");
-}
+import { db } from "@/db";
+import { users } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -44,61 +14,46 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalidCredentials" }, { status: 400 });
   }
 
-  let user: any = null;
-  let dbPath = "";
-
+  let user;
   try {
-    const Database = require("better-sqlite3");
-    dbPath = getDbPath();
-    
-    // Ensure directory exists
-    const dir = path.dirname(dbPath);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    
-    const sqlite = new Database(dbPath);
-    
-    // Create tables if not exists
-    sqlite.exec(`CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE,
-      password TEXT,
-      role TEXT DEFAULT 'user',
-      permissions TEXT DEFAULT '[]',
-      is_active INTEGER DEFAULT 1,
-      worker_id INTEGER,
-      access_settings TEXT,
-      created_at INTEGER
-    )`);
-    
-    // Create admin if not exists
-    const existing = sqlite.prepare("SELECT id FROM users WHERE username = 'Roofa'").get();
-    if (!existing) {
-      const hashed = hashPasswordSimple("Azer123");
-      sqlite.prepare("INSERT INTO users (username, password, role, permissions, is_active, created_at) VALUES (?, ?, ?, ?, ?, ?)")
-        .run("Roofa", hashed, "admin", "[]", 1, Date.now());
-    }
-    
-    user = sqlite.prepare("SELECT * FROM users WHERE username = ?").get(username);
-    sqlite.close();
-    
-    console.log("DB path used:", dbPath);
-  } catch (e: any) {
-    console.error("DB error:", e.message);
-    return NextResponse.json({ error: "dbError", message: e.message }, { status: 500 });
+    user = await db.select().from(users).where(eq(users.username, username)).limit(1);
+  } catch (e) {
+    console.error("DB error:", e);
+    return NextResponse.json({ error: "dbError", message: "Database connection failed" }, { status: 500 });
   }
 
-  if (!user) {
+  if (!user[0] || user[0].password !== hashPassword(password) || !user[0].isActive) {
     return NextResponse.json({ error: "invalidCredentials" }, { status: 401 });
   }
 
-  const hashed = hashPassword(password);
-  if (user.password !== hashed || !user.is_active) {
-    return NextResponse.json({ error: "invalidCredentials" }, { status: 401 });
+  // Check access control for non-admin users
+  if (user[0].role !== "admin" && user[0].accessSettings) {
+    try {
+      const accessSettings = JSON.parse(user[0].accessSettings as string);
+      const now = new Date();
+      const currentDay = String(now.getDay());
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+      
+      if (accessSettings.days && accessSettings.days.length > 0) {
+        if (!accessSettings.days.includes(currentDay)) {
+          return NextResponse.json({ error: "accessDeniedDay" }, { status: 403 });
+        }
+      }
+      
+      if (accessSettings.timeStart && accessSettings.timeEnd) {
+        const [startH, startM] = accessSettings.timeStart.split(":").map(Number);
+        const [endH, endM] = accessSettings.timeEnd.split(":").map(Number);
+        const startMinutes = startH * 60 + startM;
+        const endMinutes = endH * 60 + endM;
+        
+        if (currentTime < startMinutes || currentTime > endMinutes) {
+          return NextResponse.json({ error: "accessDenied" }, { status: 403 });
+        }
+      }
+    } catch {}
   }
 
-  const token = createSessionToken(user.id);
+  const token = createSessionToken(user[0].id);
   const cookieStore = await cookies();
   cookieStore.set("session", token, {
     httpOnly: true,
