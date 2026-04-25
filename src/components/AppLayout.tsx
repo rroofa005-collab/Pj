@@ -33,6 +33,7 @@ const ALL_NAV: NavItem[] = [
   { key: "attendance", icon: "📅", href: "/dashboard/attendance" },
   { key: "settings", icon: "⚙️", href: "/dashboard/settings" },
   { key: "admin", icon: "👥", href: "/dashboard/admin" },
+  { key: "maintenanceInstallments", icon: "💵", href: "/dashboard/maintenance-installments" },
 ];
 
 interface AppLayoutProps {
