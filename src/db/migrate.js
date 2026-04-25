@@ -216,6 +216,16 @@ try {
     value TEXT NOT NULL
   )`);
 
+  // Maintenance Installments table
+  sqlite.exec(`CREATE TABLE IF NOT EXISTS maintenance_installments (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    maintenance_id INTEGER,
+    amount REAL NOT NULL DEFAULT 0,
+    paid_amount REAL NOT NULL DEFAULT 0,
+    installment_date INTEGER,
+    created_at INTEGER
+  )`);
+
   // External Maintenance table
   sqlite.exec(`CREATE TABLE IF NOT EXISTS external_maintenance (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,

@@ -1,5 +1,15 @@
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 
+// Maintenance Installments (اقساط الصيانة)
+export const maintenanceInstallments = sqliteTable("maintenance_installments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  maintenanceId: integer("maintenance_id"),
+  amount: real("amount").notNull().default(0),
+  paidAmount: real("paid_amount").notNull().default(0),
+  installmentDate: integer("installment_date", { mode: "timestamp" }),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(() => new Date()),
+});
+
 // Users / Auth
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
