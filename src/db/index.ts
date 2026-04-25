@@ -1,31 +1,16 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
-import type { BetterSQLite3Database } from "drizzle-orm/better-sqlite3";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import * as schema from "./schema";
-import path from "path";
-import { mkdirSync, existsSync } from "fs";
 
-let _db: BetterSQLite3Database<typeof schema> | null = null;
+const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
 
-function getDb(): BetterSQLite3Database<typeof schema> {
-  if (_db) return _db;
-
-  const dbPath = process.env.DATABASE_URL || process.env.POSTGRES_URL || "./data/database.db";
-  const resolvedPath = path.resolve(dbPath);
-
-  const dir = path.dirname(resolvedPath);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-
-  console.log("Connecting to database at:", resolvedPath);
-  const sqlite = new Database(resolvedPath);
-  _db = drizzle(sqlite, { schema });
-  return _db;
+if (!connectionString) {
+  throw new Error("DATABASE_URL or POSTGRES_URL environment variable is not set. Please set it in your Railway or environment variables.");
 }
 
-export const db = new Proxy({} as BetterSQLite3Database<typeof schema>, {
-  get(_, prop: string | symbol) {
-    return (getDb() as unknown as Record<string | symbol, unknown>)[prop];
-  },
+const pool = new Pool({ 
+  connectionString,
+  max: 1 
 });
+
+export const db = drizzle(pool, { schema });
