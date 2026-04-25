@@ -14,22 +14,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalidCredentials" }, { status: 400 });
   }
 
-  let user;
+  let user: any;
   try {
-    user = await db.select().from(users).where(eq(users.username, username)).limit(1);
-  } catch (e) {
-    console.error("DB error:", e);
-    return NextResponse.json({ error: "dbError", message: "Database connection failed" }, { status: 500 });
+    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    user = result[0];
+  } catch (e: any) {
+    console.error("DB error:", e.message);
+    return NextResponse.json({ error: "dbError", message: e.message }, { status: 500 });
   }
 
-  if (!user[0] || user[0].password !== hashPassword(password) || !user[0].isActive) {
+  if (!user || user.password !== hashPassword(password) || !user.isActive) {
     return NextResponse.json({ error: "invalidCredentials" }, { status: 401 });
   }
 
   // Check access control for non-admin users
-  if (user[0].role !== "admin" && user[0].accessSettings) {
+  if (user.role !== "admin" && user.accessSettings) {
     try {
-      const accessSettings = JSON.parse(user[0].accessSettings as string);
+      const accessSettings = JSON.parse(user.accessSettings);
       const now = new Date();
       const currentDay = String(now.getDay());
       const currentTime = now.getHours() * 60 + now.getMinutes();
@@ -50,14 +51,16 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ error: "accessDenied" }, { status: 403 });
         }
       }
-    } catch {}
+    } catch (e) {
+      console.error("Access control error:", e);
+    }
   }
 
-  const token = createSessionToken(user[0].id);
+  const token = createSessionToken(user.id);
   const cookieStore = await cookies();
   cookieStore.set("session", token, {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 60 * 60 * 24 * 7,
     path: "/",

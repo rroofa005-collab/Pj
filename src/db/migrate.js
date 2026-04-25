@@ -2,7 +2,7 @@ const path = require("path");
 const fs = require("fs");
 
 try {
-  const dbPath = process.env.DB_PATH || "./data/database.db";
+  const dbPath = process.env.DB_PATH || process.env.DATABASE_URL || "./data/database.db";
   const resolvedPath = path.resolve(dbPath);
 
   const dir = path.dirname(resolvedPath);
