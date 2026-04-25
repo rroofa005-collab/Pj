@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { hashPassword, createSessionToken } from "@/lib/server-auth";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq } from "drizzle-orm/better-sqlite3";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();

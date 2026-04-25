@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { users, appSettings } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq } from "drizzle-orm/better-sqlite3";
 import { hashPassword, createSessionToken } from "@/lib/server-auth";
 
 export async function loginAction(formData: FormData) {

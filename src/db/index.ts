@@ -1,16 +1,18 @@
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+// Force SQLite - Block any pg auto-import
+import path from "path";
+import { mkdirSync, existsSync } from "fs";
 import * as schema from "./schema";
 
-const connectionString = process.env.DATABASE_URL || process.env.POSTGRES_URL || "";
+// CRITICAL: Prevent Next.js from tree-shaking to node-postgres
+(global as any).__NO_PG__ = true;
 
-if (!connectionString) {
-  throw new Error("DATABASE_URL or POSTGRES_URL environment variable is not set. Please set it in your Railway or environment variables.");
-}
+const Database = require("better-sqlite3");
+const { drizzle: drizzleSQLite } = require("drizzle-orm/better-sqlite3");
 
-const pool = new Pool({ 
-  connectionString,
-  max: 1 
-});
+const dbPath = process.env.DB_PATH || "./data/database.db";
+const resolvedPath = path.resolve(dbPath);
+const dir = path.dirname(resolvedPath);
+if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 
-export const db = drizzle(pool, { schema });
+const sqlite = new Database(resolvedPath);
+export const db = drizzleSQLite(sqlite, { schema });

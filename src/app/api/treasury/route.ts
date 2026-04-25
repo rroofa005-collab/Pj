@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db, eq } from "@/lib/apiHelper";
 import { treasury } from "@/db/schema";
 import { getSession } from "@/lib/server-auth";
-import { gte, lte, and } from "drizzle-orm";
+import { gte, lte, and } from "drizzle-orm/better-sqlite3";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
