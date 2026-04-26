@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, eq } from "@/lib/apiHelper";
+import { and, db, eq, gte, like, lte } from "@/lib/apiHelper";
 import { electronicServices } from "@/db/schema";
 import { getSession } from "@/lib/server-auth";
-import { gte, lte, and, like } from "drizzle-orm/better-sqlite3";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();

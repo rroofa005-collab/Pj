@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db, eq } from "@/lib/apiHelper";
+import { db, eq, and, like, gte, lte } from "@/lib/apiHelper";
 import { supplierDebts } from "@/db/schema";
 import { getSession } from "@/lib/server-auth";
-import { gte, lte, and, like } from "drizzle-orm/better-sqlite3";
 
 function getStatus(remaining: number): string {
   if (remaining <= 0) return "paid";

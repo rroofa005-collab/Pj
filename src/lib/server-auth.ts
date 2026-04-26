@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { eq } from "drizzle-orm/better-sqlite3";
+import { eq } from "drizzle-orm";
 
 export interface SessionUser {
   id: number;
